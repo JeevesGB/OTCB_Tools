@@ -293,26 +293,22 @@ class TIMViewer(tk.Tk):
         self.display_image()
 
     def batch_convert(self):
-        if not self.tim_files:
-            messagebox.showinfo("No Files", "No files loaded.")
+        base_output_folder = filedialog.askdirectory()
+        if not base_output_folder:
             return
-        out_dir = filedialog.askdirectory()
-        if not out_dir:
-            return
+
+        output_folder = os.path.join(base_output_folder, "Converted Tims")
+        os.makedirs(output_folder, exist_ok=True)
 
         count = 0
-        for i, path in enumerate(self.tim_files):
-            try:
-                img = read_tim(path, palette_index=self.palette_indices[i])
-                base = os.path.basename(path)
-                base_noext = os.path.splitext(base)[0]
-                out_path = os.path.join(out_dir, f"{base_noext}.png")
+        for i, (path, img) in enumerate(zip(self.tim_files, self.images)):
+            if img:
+                name = os.path.splitext(os.path.basename(path))[0] + ".png"
+                out_path = os.path.join(output_folder, name)
                 img.save(out_path)
                 count += 1
-            except Exception as e:
-                print(f"Failed to convert {path}: {e}")
 
-        messagebox.showinfo("Batch Conversion", f"Converted {count} files.")
+        messagebox.showinfo("Done", f"Converted {count} files to:\n{output_folder}")
 
 
 if __name__ == "__main__":
