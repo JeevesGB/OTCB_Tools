@@ -85,34 +85,123 @@ def read_tim(filepath, palette_index=0):
                                    Image.fromarray(b.astype(np.uint8))])
 
 
+def image_to_tim(image: Image.Image, bpp=8):
+
+
+    if image.mode != 'P':
+        image = image.convert('P', palette=Image.ADAPTIVE, colors=16 if bpp == 4 else 256)
+
+    palette = image.getpalette()
+    if palette is None:
+        raise ValueError("Image has no palette")
+
+    width, height = image.size
+    pixels = np.array(image)
+
+
+
+    clut_colors = []
+    for i in range(0, len(palette), 3):
+        r = palette[i] >> 3
+        g = palette[i+1] >> 3
+        b = palette[i+2] >> 3
+        color_16 = (b << 10) | (g << 5) | r
+        clut_colors.append(color_16)
+
+    unique_colors = np.unique(pixels)
+    clut_array = np.array([clut_colors[c] for c in unique_colors], dtype=np.uint16)
+
+
+    clut_array = np.array(clut_colors[:16 if bpp == 4 else 256], dtype=np.uint16)
+    clut_w = 16 if bpp == 4 else 256
+    clut_h = 1
+
+
+    clut_data = clut_array.tobytes()
+
+
+    flags = 0x08  # has CLUT
+    flags |= 0 if bpp == 4 else 1 if bpp == 8 else 0
+
+
+    header = struct.pack("<I", 0x10)  # magic
+    flags_val = 0
+    if bpp == 4:
+        flags_val = 0  # 4bpp
+    elif bpp == 8:
+        flags_val = 1  # 8bpp
+    else:
+        raise NotImplementedError("Only 4bpp and 8bpp supported for writing TIM")
+
+    flags_val |= 0x08  # CLUT flag
+
+    header += struct.pack("<I", flags_val)
+
+
+    clut_block_size = 12 + len(clut_data)
+
+
+    header += struct.pack("<I", clut_block_size)
+    header += struct.pack("<4H", 0, 0, clut_w, clut_h)
+    header += clut_data
+
+
+
+    if bpp == 4:
+        w_words = width // 4
+    else:
+        w_words = width // 2
+
+
+    if bpp == 4:
+        flat_pixels = pixels.flatten()
+        flat_pixels = np.clip(flat_pixels, 0, 15)
+        packed_pixels = bytearray()
+        for i in range(0, len(flat_pixels), 2):
+            first = flat_pixels[i]
+            second = flat_pixels[i+1] if i+1 < len(flat_pixels) else 0
+            packed_pixels.append((second << 4) | first)
+        pixel_bytes = bytes(packed_pixels)
+    else:
+
+        pixel_bytes = pixels.tobytes()
+
+    img_block_size = 12 + len(pixel_bytes)
+    header += struct.pack("<I", img_block_size)
+    header += struct.pack("<4H", 0, 0, w_words, height)
+    header += pixel_bytes
+
+    return header
+
 class TIMViewer(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("TIM Viewer")
-        self.geometry("1000x800")
+        self.title("TIM View")
+        self.geometry("1000x860")
 
         self.tim_files = []
         self.images = []
-        self.tk_images_cache = []  # Cache PhotoImage per image+zoom
+        self.tk_images_cache = []
         self.palettes = []
         self.palette_indices = []
         self.zoom_levels = []
         self.bpp_modes = []
+        self.file_types = []
 
         self.index = 0
 
-        # Image display
+
         self.img_label = tk.Label(self)
         self.img_label.pack(pady=10)
         self.img_label.bind("<MouseWheel>", self.on_mouse_wheel)  # Windows
         self.img_label.bind("<Button-4>", self.on_mouse_wheel)    # Linux scroll up
         self.img_label.bind("<Button-5>", self.on_mouse_wheel)    # Linux scroll down
 
-        # Status label
+
         self.status_label = tk.Label(self, text="")
         self.status_label.pack()
 
-        # Controls frame
+
         ctrl_frame = tk.Frame(self)
         ctrl_frame.pack(pady=5)
 
@@ -137,12 +226,24 @@ class TIMViewer(tk.Tk):
         self.debug_var = tk.BooleanVar(value=False)
         tk.Checkbutton(self, text="Show Debug Info", variable=self.debug_var, command=self.display_image).pack(pady=5)
 
+
+        options_frame = tk.Frame(self)
+        options_frame.pack(pady=5)
+
+        self.convert_png_var = tk.BooleanVar(value=True)
+        self.convert_bmp_var = tk.BooleanVar(value=True)
+        self.convert_to_tim_var = tk.BooleanVar(value=False)
+
+        tk.Checkbutton(options_frame, text="Convert to PNG", variable=self.convert_png_var).pack(side=tk.LEFT, padx=10)
+        tk.Checkbutton(options_frame, text="Convert to BMP", variable=self.convert_bmp_var).pack(side=tk.LEFT, padx=10)
+        tk.Checkbutton(options_frame, text="Convert PNG/BMP to TIM", variable=self.convert_to_tim_var).pack(side=tk.LEFT, padx=10)
+
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=10)
         tk.Button(btn_frame, text="Select Folder", command=self.select_folder).pack(side=tk.LEFT, padx=10)
-        tk.Button(btn_frame, text="Batch Convert to PNG", command=self.batch_convert).pack(side=tk.LEFT, padx=10)
+        tk.Button(btn_frame, text="Batch Convert", command=self.batch_convert).pack(side=tk.LEFT, padx=10)
 
-        # Keyboard bindings for left/right arrows
+
         self.bind("<Left>", lambda e: self.prev_image())
         self.bind("<Right>", lambda e: self.next_image())
 
@@ -158,158 +259,197 @@ class TIMViewer(tk.Tk):
         self.palette_indices.clear()
         self.zoom_levels.clear()
         self.bpp_modes.clear()
+        self.file_types.clear()
+
 
         for path in all_files:
-            try:
-                with open(path, "rb") as f:
-                    if struct.unpack("<I", f.read(4))[0] == 0x10:
-                        self.tim_files.append(path)
-            except Exception:
-                continue
+            ext = os.path.splitext(path)[1].lower()
+            if ext == '.tim':
+
+                try:
+                    with open(path, "rb") as f:
+                        if struct.unpack("<I", f.read(4))[0] == 0x10:
+                            self.tim_files.append(path)
+                            self.file_types.append('tim')  # <-- NEW
+                except Exception:
+                    continue
+            elif ext in ['.png', '.bmp']:
+                self.tim_files.append(path)
+                self.file_types.append(ext[1:])  # 'png' or 'bmp'
 
         if not self.tim_files:
-            messagebox.showinfo("No Valid Files", "No valid TIM files found.")
+            messagebox.showinfo("No Valid Files", "No valid TIM, PNG, or BMP files found.")
             return
 
-        # Gather palette counts, bpp and init state
-        for path in self.tim_files:
-            try:
-                with open(path, 'rb') as f:
-                    f.seek(4)
-                    flags = struct.unpack("<I", f.read(4))[0]
-                    has_clut = flags & 0x08
-                    bpp_mode = flags & 0x07
-                    bpp = {0: 4, 1: 8, 2: 16, 3: 24}.get(bpp_mode, None)
 
-                    if has_clut:
-                        f.seek(12)
-                        clut_size = struct.unpack("<I", f.read(4))[0]
-                        clut_x, clut_y, clut_w, clut_h = struct.unpack("<4H", f.read(8))
-                        f.seek(24)
-                        clut_data = f.read(clut_size - 12)
-                        clut_colors = np.frombuffer(clut_data, dtype=np.uint16)
-                        num_palettes = clut_colors.size // clut_w
-                    else:
-                        num_palettes = 0
+        for i, path in enumerate(self.tim_files):
+            ft = self.file_types[i]
+            if ft == 'tim':
+                try:
+                    with open(path, 'rb') as f:
+                        f.seek(4)
+                        flags = struct.unpack("<I", f.read(4))[0]
+                        has_clut = flags & 0x08
+                        bpp_mode = flags & 0x07
+                        bpp = {0: 4, 1: 8, 2: 16, 3: 24}.get(bpp_mode, None)
 
-                    self.palettes.append(num_palettes)
+                        if has_clut:
+                            f.seek(12)
+                            clut_size = struct.unpack("<I", f.read(4))[0]
+                            clut_x, clut_y, clut_w, clut_h = struct.unpack("<4H", f.read(8))
+                            palettes_count = clut_h
+                        else:
+                            palettes_count = 1
+
+                        self.palettes.append(palettes_count)
+                        self.palette_indices.append(0)
+                        self.bpp_modes.append(bpp)
+                        self.zoom_levels.append(4)
+                except Exception as e:
+                    self.palettes.append(1)
                     self.palette_indices.append(0)
+                    self.bpp_modes.append(4)
                     self.zoom_levels.append(4)
-                    self.bpp_modes.append(bpp)
-            except Exception:
-                self.palettes.append(0)
+            else:
+                # For PNG/BMP, no palettes, bpp = 24
+                self.palettes.append(1)
                 self.palette_indices.append(0)
+                self.bpp_modes.append(24)
                 self.zoom_levels.append(4)
-                self.bpp_modes.append(None)
 
         self.index = 0
-        self.load_images()
-        self.update_palette_dropdown()
         self.display_image()
+        self.update_palette_combobox()
 
-    def load_images(self):
-        self.images.clear()
-        self.tk_images_cache.clear()
-        for i, path in enumerate(self.tim_files):
-            try:
-                img = read_tim(path, palette_index=self.palette_indices[i])
-                self.images.append(img)
-                self.tk_images_cache.append({})  # Cache dict for zoom levels
-            except Exception as e:
-                print(f"Failed loading {path}: {e}")
-                self.images.append(None)
-                self.tk_images_cache.append({})
-
-    def update_palette_dropdown(self):
-        palette_count = self.palettes[self.index]
-        if palette_count > 1:
-            self.palette_cb['values'] = [str(i) for i in range(palette_count)]
+    def update_palette_combobox(self):
+        palettes = self.palettes[self.index]
+        if palettes > 1:
+            self.palette_cb.config(values=list(range(palettes)), state="readonly")
             self.palette_cb.current(self.palette_indices[self.index])
-            self.palette_cb.config(state="readonly")
+            self.palette_cb.pack(side=tk.LEFT)
         else:
-            self.palette_cb.set("N/A")
-            self.palette_cb.config(state="disabled")
+            self.palette_cb.set("")
+            self.palette_cb.pack_forget()
 
     def on_palette_change(self, event):
-        new_index = int(self.palette_cb.get())
-        self.palette_indices[self.index] = new_index
-        try:
-            self.images[self.index] = read_tim(self.tim_files[self.index], palette_index=new_index)
-            self.tk_images_cache[self.index].clear()  # Clear cached zoomed images
-            self.display_image()
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to reload image with palette {new_index}: {e}")
+        selected = self.palette_cb.current()
+        self.palette_indices[self.index] = selected
+        self.display_image()
+
+    def load_image(self, idx):
+        path = self.tim_files[idx]
+        ft = self.file_types[idx]
+
+        if ft == 'tim':
+            try:
+                img = read_tim(path, self.palette_indices[idx])
+                return img
+            except Exception as e:
+                print(f"Error loading TIM file: {path} {e}")
+                return None
+        elif ft in ['png', 'bmp']:
+            try:
+                img = Image.open(path).convert("RGBA")
+                return img
+            except Exception as e:
+                print(f"Error loading image file: {path} {e}")
+                return None
+        else:
+            return None
 
     def display_image(self):
-        if not self.images or self.images[self.index] is None:
-            self.img_label.config(image="", text="Failed to load image")
-            self.status_label.config(text="")
+        img = self.load_image(self.index)
+        if img is None:
+            self.img_label.config(image='', text="Failed to load image")
             return
 
         zoom = self.zoom_level.get()
-        self.zoom_levels[self.index] = zoom
+        w, h = img.size
+        img = img.resize((w * zoom, h * zoom), Image.NEAREST)
 
-        cache = self.tk_images_cache[self.index]
-        if zoom not in cache:
-            img = self.images[self.index]
-            zoomed_img = img.resize((img.width * zoom, img.height * zoom), Image.NEAREST)
-            tk_img = ImageTk.PhotoImage(zoomed_img)
-            cache[zoom] = tk_img
-        else:
-            tk_img = cache[zoom]
-
-        self.img_label.config(image=tk_img, text="")
-        self.img_label.image = tk_img
-
-        fname = os.path.basename(self.tim_files[self.index])
-        palette_info = f"Palette: {self.palette_indices[self.index]}" if self.palettes[self.index] > 1 else ""
-        zoom_info = f"Zoom: {zoom}x"
-        debug_info = ""
         if self.debug_var.get():
-            debug_info = f" | BPP: {self.bpp_modes[self.index]} | Palettes: {self.palettes[self.index]}"
-        status = f"{fname} [{self.index + 1}/{len(self.tim_files)}] {palette_info} {zoom_info}{debug_info}"
-        self.status_label.config(text=status)
+            debug_text = f"{self.index + 1}/{len(self.tim_files)} | {os.path.basename(self.tim_files[self.index])} | Zoom: {zoom}x | Palette: {self.palette_indices[self.index]}"
+            self.status_label.config(text=debug_text)
+        else:
+            self.status_label.config(text=os.path.basename(self.tim_files[self.index]))
+
+        tk_img = ImageTk.PhotoImage(img)
+        self.tk_images_cache = [tk_img]  # prevent GC
+        self.img_label.config(image=tk_img)
 
     def prev_image(self):
         if not self.tim_files:
             return
         self.index = (self.index - 1) % len(self.tim_files)
-        self.update_palette_dropdown()
+        self.update_palette_combobox()
         self.display_image()
 
     def next_image(self):
         if not self.tim_files:
             return
         self.index = (self.index + 1) % len(self.tim_files)
-        self.update_palette_dropdown()
+        self.update_palette_combobox()
         self.display_image()
 
     def on_mouse_wheel(self, event):
-        if event.num == 4 or event.delta > 0:
-            new_zoom = min(self.zoom_level.get() + 1, 8)
-        else:
-            new_zoom = max(self.zoom_level.get() - 1, 1)
-        self.zoom_level.set(new_zoom)
+        delta = 0
+        if event.num == 5 or event.delta < 0:
+            delta = -1
+        elif event.num == 4 or event.delta > 0:
+            delta = 1
+        current = self.zoom_level.get()
+        new_val = max(1, min(8, current + delta))
+        self.zoom_level.set(new_val)
         self.display_image()
 
     def batch_convert(self):
-        base_output_folder = filedialog.askdirectory()
-        if not base_output_folder:
+        if not self.tim_files:
+            messagebox.showinfo("No files", "No files loaded.")
             return
 
-        output_folder = os.path.join(base_output_folder, "Converted Tims")
-        os.makedirs(output_folder, exist_ok=True)
+        folder = filedialog.askdirectory()
+        if not folder:
+            return
+
+        save_folder = folder
+
+        if self.convert_to_tim_var.get():
+            save_folder = os.path.join(folder, "Converted to TIM")
+            os.makedirs(save_folder, exist_ok=True)
 
         count = 0
-        for i, (path, img) in enumerate(zip(self.tim_files, self.images)):
-            if img:
-                name = os.path.splitext(os.path.basename(path))[0] + ".png"
-                out_path = os.path.join(output_folder, name)
-                img.save(out_path)
-                count += 1
+        for i, path in enumerate(self.tim_files):
+            ft = self.file_types[i]
+            filename = os.path.splitext(os.path.basename(path))[0]
 
-        messagebox.showinfo("Done", f"Converted {count} files to:\n{output_folder}")
+            try:
+                if ft == 'tim':
+                    if self.convert_png_var.get():
+                        img = read_tim(path, self.palette_indices[i])
+                        save_path = os.path.join(save_folder, f"{filename}.png")
+                        img.save(save_path)
+                        count += 1
+                    if self.convert_bmp_var.get():
+                        img = read_tim(path, self.palette_indices[i])
+                        save_path = os.path.join(save_folder, f"{filename}.bmp")
+                        img.save(save_path)
+                        count += 1
+                elif ft in ['png', 'bmp']:
+                    if self.convert_to_tim_var.get():
+                        # Load image and convert to TIM bytes
+                        img = Image.open(path).convert('RGBA')
+                        # Convert to 'P' mode for indexed palette, default 8bpp
+                        img_p = img.convert('P', palette=Image.ADAPTIVE, colors=16)
+                        tim_bytes = image_to_tim(img_p, bpp=4)
 
+                        save_path = os.path.join(save_folder, f"{filename}.tim")
+                        with open(save_path, "wb") as f:
+                            f.write(tim_bytes)
+                        count += 1
+            except Exception as e:
+                print(f"Error converting {path}: {e}")
+
+        messagebox.showinfo("Batch Conversion", f"Conversion complete! {count} files saved.")
 
 if __name__ == "__main__":
     app = TIMViewer()
