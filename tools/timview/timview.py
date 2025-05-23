@@ -36,7 +36,15 @@ def read_tim(filepath, palette_index=0):
             selected_palette = None
 
         image_size = struct.unpack("<I", f.read(4))[0]
-        x, y, w, h = struct.unpack("<4H", f.read(8))
+        x, y, w_words, h = struct.unpack("<4H", f.read(8))
+
+        # Convert width from words to pixels
+        if bpp == 4:
+            w = w_words * 4
+        elif bpp == 8:
+            w = w_words * 2
+        else:
+            w = w_words
         raw_data = f.read()
 
         if bpp == 4:
