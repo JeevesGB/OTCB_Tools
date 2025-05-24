@@ -43,17 +43,21 @@ def extract_model(filepath):
     data = filepath.read_bytes()
 
     vertices = scan_vertices(data)
-    print(f"Found {len(vertices)} vertices.")
+    print(f"{filepath.name}: Found {len(vertices)} vertices.")
 
     faces = scan_face_indices(data, len(vertices))
-    print(f"Detected {len(faces)} face indices.")
+    print(f"{filepath.name}: Detected {len(faces)} face indices.")
 
-    # Output directory named after the .BIN file
     output_dir = filepath.parent / filepath.stem
     output_dir.mkdir(parents=True, exist_ok=True)
 
     output_path = output_dir / f"{filepath.stem}.obj"
     export_obj(vertices, faces, output_path)
 
+def batch_extract_from_folder(folder_path):
+    folder = Path(folder_path)
+    for bin_file in folder.glob("*.BIN"):
+        extract_model(bin_file)
 
-extract_model("CIRCU_A1.BIN")
+# Call this with your directory
+batch_extract_from_folder(r"C:\Users\there\Desktop\OTCB Tools\track extraction\Track .bin")
