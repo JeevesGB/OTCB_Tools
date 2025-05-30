@@ -25,7 +25,10 @@ Folder Structure
 - SUB2 = CONFIG.BIN, RECODES.BIN, STAFF.BIN, VICTORY.BIN (Unknown)
 - SUB3 = AMBG.BIN, CHMBG.BIN, CTTLBG0.BIN, CTTLBG1.BIN, CTTLBG2.BIN, CTTLBG3.BIN, RIVBG.BIN, TMABG.BIN, TTLBG.BIN, TUNBG.BIN (Unknown)
 - WHEEL1 - WHEEL3 = Wheel textures (.TIM File)
-- X_STR = END.STR, MTO.STR, OPEN.STR = (Video Files)
+- X_STR = END.STR, MTO.STR, OPEN.STR = (Video Files | Can be viewed and converted with jPSXdec)
 - Z_DA = .DA Files (Unknown)
 
 
+---
+ 
+-
