@@ -80,12 +80,12 @@ class STRAVITool:
 
     def convert_str_to_avi(self, path):
         self.log(f"Converting STR to AVI: {path}")
-        # TODO: Real conversion logic
+        #: Real conversion logic
         self.log("Conversion complete (placeholder).")
 
     def convert_avi_to_str(self, path):
         self.log(f"Converting AVI to STR: {path}")
-        # TODO: Real conversion logic
+        #: Real conversion logic
         self.log("Conversion complete (placeholder).")
 
     def play_preview(self):
