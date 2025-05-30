@@ -1,9 +1,3 @@
-#ifndef STR_CONVERTER_H
-#define STR_CONVERTER_H
-
+#pragma once
 #include <string>
-
-void convertStrToAvi(const std::string& filepath);
-void convertAviToStr(const std::string& filepath);
-
-#endif
+int convert_str_to_avi(const std::string& path);
