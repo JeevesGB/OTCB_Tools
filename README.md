@@ -9,10 +9,10 @@ Discord - https://discord.gg/udzejAFTFb
 ---
 Option Tuning Car Battle Spec R -  SLPS-02587
 -
-
 ---
 Folder Structure 
-- 
+-
+
 - C0 - C5 = .CAR Files 
 - C6 = Empty Folder
 - CS = Courses (.TIX Files extractable, Track files not yet extractable)
