@@ -1,10 +1,10 @@
-WIP 
+     **WIP** 
 
 Project to potentially create tools for extracting/modifying files in Option Tuning Car Battle Spec R 
 
 Contributors welcome
 
-Discord - https://discord.gg/udzejAFTFb
+_Discord - https://discord.gg/udzejAFTFb_
 
 ---
 Option Tuning Car Battle Spec R -  SLPS-02587
@@ -26,10 +26,9 @@ C6
 Empty Folder
 
 ---
-CS 
+CS
 ---
-
-
+        
 - CIRCU_A1.BIN
 - CIRCU_A1.TIX (TEXTURES)
 
