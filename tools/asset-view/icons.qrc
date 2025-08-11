@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="buttons">
+    <file>smile.png</file>
+    <file>exporticon.png</file>
+    <file>openicon.png</file>
+  </qresource>
+</RCC>
