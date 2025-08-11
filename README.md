@@ -13,22 +13,195 @@ Option Tuning Car Battle Spec R -  SLPS-02587
 Folder Structure 
 -
 
-- C0 - C5 = .CAR Files 
-- C6 = Empty Folder
-- CS = Courses (.TIX Files extractable, Track files not yet extractable)
-- EV1 - EV3 = .VOI Files (Unknown Format)
-- OTHER = OTHER1.BIN (Unknown)
-- RACE = CAMERA.BIN & RACE.BIN (Unknown)
-- SE = .SHB Files (Unknown | Music??)
-- SUB0 = Menu Files? (Unknown)
-- SUB1 = MC_CAR.BIN & MC_SYS.BIN (Unknown)
-- SUB2 = CONFIG.BIN, RECODES.BIN, STAFF.BIN, VICTORY.BIN (Unknown)
-- SUB3 = AMBG.BIN, CHMBG.BIN, CTTLBG0.BIN, CTTLBG1.BIN, CTTLBG2.BIN, CTTLBG3.BIN, RIVBG.BIN, TMABG.BIN, TTLBG.BIN, TUNBG.BIN (Unknown)
-- WHEEL1 - WHEEL3 = Wheel textures (.TIM File)
-- X_STR = END.STR, MTO.STR, OPEN.STR = (Video Files | Can be viewed and converted with jPSXdec)
-- Z_DA = .DA Files (Unknown)
+
+--- 
+C0 - C5 
+---
+.CAR Files
 
 
 ---
- 
--
+C6 
+---
+Empty Folder
+
+---
+CS 
+---
+
+
+- CIRCU_A1.BIN
+- CIRCU_A1.TIX (TEXTURES)
+
+
+- CIRCU_A2.BIN
+- CIRCU_A2.TIX
+
+
+- EBISU_A3.BIN
+- EBISU_A3.TIX
+
+
+- EBISU_A4.BIN
+- EBISU_A4.TIX
+
+
+- SHUTO_H1.BIN
+- SHUTO_H1.TIX
+
+
+- SHUTO_H2.BIN
+- SHUTO_H2.TIX
+
+
+- TOUGE_C1.BIN
+- TOUGE_C1.TIX
+
+
+- TOUGE_C2.BIN
+- TOUGE_C2.TIX
+
+
+- TOUGE_C3.BIN
+- TOUGE_C3.TIX
+
+
+- TOUGE_C4.BIN
+- TOUGE_C4.TIX
+
+
+- WANGA_H3.BIN
+- WANGA_H3.TIX
+
+- WANGA_H4.BIN
+- WANGA_H4.TIX
+
+
+---
+EV1 - EV3 
+---
+- .VOI Files 
+
+---
+OTHER
+---
+- OTHER1.BIN 
+
+---
+RACE  
+---
+- CAMERA.BIN
+- RACE.BIN
+
+---
+SE
+---
+- GAME0.VHB
+- RACE0.VHB
+- SEQ00.VHB
+- SEQ01.SHB
+- SEQ02.SHB
+- SEQ03.SHB
+- SEQ04.SHB
+- SEQ05.SHB
+- SEQ06.SHB
+- SEQ07.SHB
+- SEQ08.SHB
+- SEQ09.SHB
+- SEQ10.SHB
+- SEQ11.SHB
+- SEQ12.SHB
+- SEQ13.SHB
+- SEQ14.SHB
+- SEQ15.SHB
+- SEQ16.SHB
+- SEQ17.SHB
+- SEQ18.SHB
+
+---
+SUB0 
+---
+- ARCMENU.BIN
+- CAR.BIN
+- CARLG.BIN
+- CARSELE.BIN
+- CHAMENU.BIN
+- COMPLET.BIN
+- COUSELE.BIN
+- COUVIEW.BIN
+- CTITLE.BIN
+- GETEXTR.BIN
+- PARSELE.BIN
+- PARVIEW.BIN
+- REPAIR.BIN
+- RESULTN.BIN
+- RIVAL.BIN
+- RIVSELE.BIN
+- SBRSIDNT.BIN
+- SETING.BIN
+- SHOPLG.BIN
+- SHPSELE.BIN
+- SHPVIEW.BIN
+- TITLE.BIN
+- TMAINMENU.BIN
+- TUNMENU.BIN
+- WHEEL.BIN 
+- WHLSELE.BIN
+
+
+
+---
+SUB1 
+---
+- MC_CAR.BIN 
+- MC_SYS.BIN 
+
+---
+SUB2 
+---
+- CONFIG.BIN
+- RECODES.BIN
+- STAFF.BIN
+- VICTORY.BIN 
+
+---
+SUB3
+---
+- AMBG.BIN 
+- CHMBG.BIN
+- CTTLBG0.BIN
+- CTTLBG1.BIN
+- CTTLBG2.BIN
+- CTTLBG3.BIN
+- RIVBG.BIN
+- TMABG.BIN
+- TTLBG.BIN
+- TUNBG.BIN
+
+---
+WHEEL1 - WHEEL3 
+---
+Wheel textures (.TIM File)
+
+---
+X_STR 
+---
+- END.STR
+- MTO.STR
+- OPEN.STR
+
+_(Video Files | Can be viewed and converted with jPSXdec)_
+
+---
+Z_DA = .DA Files 
+---
+- DA00.DA
+- DA01.DA
+- DA02.DA
+- DA03.DA
+- DA04.DA
+- DA05.DA
+- DA06.DA
+- DA07.DA
+- DA08.DA
+- ZZZZ.DA
