@@ -29,7 +29,7 @@ pip install PyQt5 Pillow
 
 1. **Run the tool**  
    ```bash
-   python tix-2-tim.py
+   python tix2tim.py
    ```
 2. **Open a `.TIX` file**  
    - Use the **File → Open** menu or the toolbar button.
@@ -64,7 +64,7 @@ This tool supports:
 To make a standalone Windows build:
 ```bash
 pip install pyinstaller
-pyinstaller --noconsole --onefile --icon=icon.ico tix-2-tim.py
+pyinstaller --noconsole --onefile --icon=icon.ico tix2tim.py
 ```
 The `.exe` will be in the `dist` folder.
 
