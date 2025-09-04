@@ -1,0 +1,97 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void _SsVmInit(byte param_1)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  SpuVoiceAttr local_60;
+  
+  FUN_8009a1fc(0);
+  DAT_800cef48 = 0;
+  SpuInitMalloc(0x20,&DAT_800cf078);
+  uVar2 = 0;
+  uVar1 = 0;
+  do {
+    (&DAT_800cece0)[uVar1] = 0;
+    uVar2 = uVar2 + 1;
+    uVar1 = (uint)uVar2;
+  } while (uVar2 < 0xc0);
+  uVar2 = 0;
+  uVar1 = 0;
+  do {
+    (&DAT_800cecc0)[uVar1] = 0;
+    uVar2 = uVar2 + 1;
+    uVar1 = (uint)uVar2;
+  } while (uVar2 < 0x18);
+  DAT_800cf028 = 0;
+  uVar2 = 0;
+  uVar1 = 0;
+  do {
+    (&DAT_800cefd0)[uVar1] = 0;
+    uVar2 = uVar2 + 1;
+    uVar1 = (uint)uVar2;
+  } while (uVar2 < 0x10);
+  if (0x17 < param_1) {
+    DAT_800cefa4 = 0x18;
+    VM_INIT_OBJ_FC();
+    return;
+  }
+  local_60.mask = 0x60093;
+  local_60.pitch = 0x1000;
+  local_60.addr = 0x1000;
+  local_60.adsr1 = 0x80ff;
+  local_60.volume.left = 0;
+  local_60.volume.right = 0;
+  local_60.adsr2 = 0x4000;
+  DAT_800cefa4 = param_1;
+  if ('\0' < (char)param_1) {
+    DAT_800ce782 = 0x18;
+    DAT_800ce780 = 0xff;
+    DAT_800ce79d = 0;
+    DAT_800ce784 = 0;
+    DAT_800ce786 = 0;
+    DAT_800ce790 = 0xffff;
+    DAT_800ce792 = 0;
+    DAT_800ce794 = 0;
+    DAT_800ce796 = 0xff;
+    DAT_800ce788 = 0;
+    DAT_800ce78c = 0;
+    DAT_800ce78a = 0x40;
+    DAT_800ce7b6 = 0;
+    DAT_800ce79e = 0;
+    DAT_800ce7a0 = 0;
+    DAT_800ce7a2 = 0;
+    DAT_800ce7a4 = 0;
+    DAT_800ce7aa = 0;
+    DAT_800ce7ac = 0;
+    DAT_800ce7ae = 0;
+    DAT_800ce7b0 = 0;
+    DAT_800ce7b2 = 0;
+    DAT_800ce7a6 = 0;
+    local_60.voice = 1;
+    SpuSetVoiceAttr(&local_60);
+    DAT_800cefc8 = 0;
+                    /* WARNING: Subroutine does not return */
+    _SsVmKeyOffNow();
+  }
+  DAT_800ceeb0 = 0;
+  DAT_800ceeb8 = 0x3fff;
+  DAT_800ceeba = 0x3fff;
+  _DAT_800ceeb4 = 0;
+  DAT_800ce770 = 0;
+  DAT_800ce772 = 0;
+  DAT_800ceea8 = 0;
+  DAT_800ce774 = 0;
+  _DAT_800ce776 = 0;
+  DAT_800ce778 = 0;
+  DAT_800ce77a = 0;
+  DAT_800cefe0 = 0;
+  DAT_800cef90 = 0;
+  DAT_800cefa8 = 0;
+  DAT_800cef92 = 0x80;
+  _SsVmFlush();
+  return;
+}
+

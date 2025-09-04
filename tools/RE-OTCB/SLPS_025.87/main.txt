@@ -1,0 +1,25 @@
+
+void main(undefined4 param_1,uint param_2,undefined4 param_3,undefined4 param_4)
+
+{
+  code *pcVar1;
+  
+  __main();
+  FUN_8009bc4c(0);
+  ResetCallback();
+  FUN_800a166c();
+  VSyncCallback(FUN_80023b40);
+  pcVar1 = FUN_80023b48;
+  DrawSyncCallback(FUN_80023b48);
+  FUN_800a167c();
+  FUN_800543a8(pcVar1,param_2,param_3,param_4);
+  FUN_8005e434();
+  FUN_8005d0f0();
+  FUN_8002b2a8();
+  FUN_80059410(pcVar1,param_2,param_3,param_4);
+  DAT_800cbac8 = 4;
+  do {
+    (*(code *)(&PTR_LAB_800ac63c)[DAT_800cbac8])();
+  } while( true );
+}
+
