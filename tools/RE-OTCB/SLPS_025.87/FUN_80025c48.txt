@@ -1,0 +1,41 @@
+
+void FUN_80025c48(void)
+
+{
+  undefined2 uVar1;
+  int iVar2;
+  int iVar3;
+  short sVar4;
+  int iVar5;
+  short local_30;
+  undefined2 local_2e;
+  short local_2c;
+  undefined2 local_2a;
+  uchar auStack_28 [8];
+  
+  memset(auStack_28,'\0',4);
+  iVar5 = 0;
+  do {
+    iVar3 = (int)(short)iVar5;
+    sVar4 = (&DAT_800ace52)[iVar3 * 3];
+    uVar1 = (&DAT_800ace54)[iVar3 * 3];
+    iVar2 = FUN_800a018c((&PTR_s_REVERS_800acd9c)
+                         [*(short *)(&DAT_800acff4 + iVar3 * 2 + DAT_800cbaf8 * 0x16)]);
+    local_2c = (short)iVar2 * 0xe;
+    if ((&DAT_800ace50)[iVar3 * 3] != 0) {
+      sVar4 = sVar4 + (short)iVar2 * -0xe;
+    }
+    local_2a = 0xe;
+    local_30 = sVar4;
+    local_2e = uVar1;
+    FUN_8002af88(auStack_28,&local_30,(uint *)(DAT_800cbb94 + 4));
+    iVar5 = iVar5 + 1;
+  } while (iVar5 * 0x10000 >> 0x10 < 0xb);
+  iVar5 = 0;
+  do {
+    FUN_8002af88(&DAT_800acb90,(undefined2 *)(&DAT_800acd24 + ((iVar5 << 0x10) >> 0xd)),
+                 (uint *)(DAT_800cbb94 + 4));
+    iVar5 = iVar5 + 1;
+  } while (iVar5 * 0x10000 >> 0x10 < 0xf);
+  return;
+}
