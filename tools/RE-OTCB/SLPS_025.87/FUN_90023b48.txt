@@ -1,0 +1,7 @@
+
+void FUN_80023b48(void)
+
+{
+  return;
+}
+

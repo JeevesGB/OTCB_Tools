@@ -1,0 +1,19 @@
+
+void FUN_80023c78(void)
+
+{
+  undefined4 *puVar1;
+  
+  puVar1 = (undefined4 *)DAT_800cbad8;
+  if (DAT_800cbad8 != (void *)0x0) {
+    do {
+      free3(puVar1);
+      puVar1 = (undefined4 *)*puVar1;
+    } while (puVar1 != (undefined4 *)0x0);
+  }
+  DAT_800cbad8 = (void *)0x0;
+  DAT_800cbad4 = &DAT_800cbad8;
+  DAT_800cbad0 = 0;
+  return;
+}
+

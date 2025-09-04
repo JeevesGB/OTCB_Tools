@@ -1,0 +1,10 @@
+
+void FUN_80023b50(void)
+
+{
+  DAT_800cbad8 = 0;
+  DAT_800cbad4 = &DAT_800cbad8;
+  DAT_800cbad0 = 0;
+  return;
+}
+
