@@ -1,0 +1,71 @@
+
+void FUN_80058620(byte *param_1,short param_2,undefined2 param_3)
+
+{
+  byte bVar1;
+  undefined2 uVar2;
+  undefined2 uVar3;
+  undefined2 uVar4;
+  undefined2 uVar5;
+  short sVar6;
+  char cVar7;
+  uint uVar8;
+  byte *pbVar9;
+  uint *puVar10;
+  int iVar11;
+  int iVar12;
+  uint *puVar13;
+  short sVar14;
+  
+  uVar2 = *DAT_800cd4bc;
+  uVar3 = DAT_800cd4bc[1];
+  uVar4 = DAT_800cd4bc[2];
+  uVar5 = DAT_800cd4bc[3];
+  puVar13 = DAT_800cd4b8;
+  if (DAT_800cd4b8 == (uint *)0x0) {
+    puVar13 = (uint *)(DAT_800cbb24 + 8);
+  }
+  sVar6 = DAT_800cd4bc[6];
+  sVar14 = DAT_800cd4bc[5] + DAT_800cd54c;
+  bVar1 = *param_1;
+  pbVar9 = param_1 + 1;
+  puVar10 = DAT_800cbb78;
+  while (uVar8 = (uint)bVar1, uVar8 != 0) {
+    if (uVar8 < 0x60) {
+      iVar12 = uVar8 - 0x20;
+    }
+    else {
+      iVar12 = uVar8 - 0x40;
+    }
+    DAT_800cbb78 = puVar10 + 5;
+                    /* Probable PsyQ macro: setSprt() + setShadeTex(sprt, 1) */
+    *(undefined1 *)((int)puVar10 + 7) = 0x65;
+    *(undefined1 *)((int)puVar10 + 3) = 4;
+    *(short *)(puVar10 + 2) = param_2;
+    *(undefined2 *)((int)puVar10 + 10) = param_3;
+    iVar11 = iVar12;
+    if (iVar12 < 0) {
+      iVar11 = iVar12 + 0xf;
+    }
+    cVar7 = (char)(iVar11 >> 4);
+    *(char *)(puVar10 + 3) = (char)uVar4 + ((char)iVar12 + cVar7 * -0x10) * (char)uVar2;
+    param_2 = param_2 + sVar6;
+    *(short *)((int)puVar10 + 0xe) = sVar14;
+    *(undefined2 *)(puVar10 + 4) = uVar2;
+    *(undefined2 *)((int)puVar10 + 0x12) = uVar3;
+    *(undefined1 *)((int)puVar10 + 6) = 0x80;
+    *(undefined1 *)((int)puVar10 + 5) = 0x80;
+    *(undefined1 *)(puVar10 + 1) = 0x80;
+    *(char *)((int)puVar10 + 0xd) = (char)uVar5 + cVar7 * (char)uVar3;
+                    /* Probable PsyQ macro: addPrim(). */
+    *puVar10 = *puVar10 & 0xff000000 | *puVar13 & 0xffffff;
+    *puVar13 = *puVar13 & 0xff000000 | (uint)puVar10 & 0xffffff;
+    bVar1 = *pbVar9;
+    pbVar9 = pbVar9 + 1;
+    puVar10 = DAT_800cbb78;
+  }
+  DAT_800cbb78 = puVar10;
+  FUN_80056b6c(puVar13,1,0,(int)(short)DAT_800cd4bc[4]);
+  return;
+}
+
