@@ -1,0 +1,26 @@
+
+void FUN_80023d80(void)
+
+{
+  if (0x80 < DAT_800cbafe) {
+    DAT_800cbafe = 0x80;
+  }
+  if (0x80 < DAT_800cbbac) {
+    DAT_800cbbac = 0x80;
+  }
+  DAT_800ac6c0 = (undefined1)DAT_800cbafe;
+  DAT_800ac6c9 = (undefined1)DAT_800cbb88;
+  DAT_800ac6c8 = (undefined1)DAT_800cbb62;
+  DAT_800ac6c1 = (undefined1)DAT_800cbbac;
+  DAT_800ac6ca = (undefined1)DAT_800cbb86;
+  DAT_800ac6cb = (undefined1)DAT_800cbb6c;
+  DAT_800ac6cc = (undefined1)DAT_800cbb6e;
+  DAT_800ac6cf = DAT_800cbb6a;
+  DAT_800ac6d2 = DAT_800cbb6b;
+  DAT_800ac6ce = (&DAT_800ac91c)[DAT_800cbb04];
+  DAT_800ac6d1 = (&DAT_800ac91c)[DAT_800cbb06];
+  DAT_800ac6cd = (&DAT_800ac914)[DAT_800cbb20];
+  DAT_800ac6d0 = (&DAT_800ac914)[DAT_800cbb22];
+  return;
+}
+

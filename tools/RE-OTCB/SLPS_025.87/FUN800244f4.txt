@@ -1,0 +1,71 @@
+
+void FUN_800244f4(void)
+
+{
+  undefined1 *puVar1;
+  uint uVar2;
+  uint *puVar3;
+  int iVar4;
+  int iVar5;
+  undefined1 local_20 [4];
+  undefined4 uStack_1c;
+  
+  puVar1 = local_20 + 3;
+  uVar2 = (uint)puVar1 & 3;
+  *(uint *)(puVar1 + -uVar2) =
+       *(uint *)(puVar1 + -uVar2) & -1 << (uVar2 + 1) * 8 | DAT_800acb6c >> (3 - uVar2) * 8;
+  local_20 = (undefined1  [4])DAT_800acb6c;
+  uVar2 = (int)&uStack_1c + 3U & 3;
+  puVar3 = (uint *)(((int)&uStack_1c + 3U) - uVar2);
+  *puVar3 = *puVar3 & -1 << (uVar2 + 1) * 8 | DAT_800acb70 >> (3 - uVar2) * 8;
+  uStack_1c = DAT_800acb70;
+  iVar4 = (int)((uint)DAT_800cbafe << 0x10) >> 0x13;
+  iVar5 = iVar4 << 0x10;
+  if (0x10 < iVar4) {
+    iVar5 = 0x100000;
+  }
+  iVar4 = 0;
+  if (0 < iVar5 >> 0x10) {
+    do {
+      local_20._0_2_ = (short)((iVar4 << 0x10) >> 0xc) + -8;
+      FUN_800578f4(&DAT_800acb80,(short *)local_20,(uint *)(DAT_800cbb94 + 4));
+      iVar4 = iVar4 + 1;
+    } while (iVar4 * 0x10000 >> 0x10 < iVar5 >> 0x10);
+  }
+  iVar4 = 0;
+  do {
+    local_20._0_2_ = (short)((iVar4 << 0x10) >> 0xc) + -8;
+    FUN_800578f4(&DAT_800acb7c,(short *)local_20,(uint *)(DAT_800cbb94 + 4));
+    iVar4 = iVar4 + 1;
+  } while (iVar4 * 0x10000 >> 0x10 < 0x10);
+  puVar1 = local_20 + 3;
+  uVar2 = (uint)puVar1 & 3;
+  *(uint *)(puVar1 + -uVar2) =
+       *(uint *)(puVar1 + -uVar2) & -1 << (uVar2 + 1) * 8 | DAT_800acb74 >> (3 - uVar2) * 8;
+  local_20 = (undefined1  [4])DAT_800acb74;
+  uVar2 = (int)&uStack_1c + 3U & 3;
+  puVar3 = (uint *)(((int)&uStack_1c + 3U) - uVar2);
+  *puVar3 = *puVar3 & -1 << (uVar2 + 1) * 8 | DAT_800acb78 >> (3 - uVar2) * 8;
+  uStack_1c = DAT_800acb78;
+  iVar4 = (int)((uint)DAT_800cbbac << 0x10) >> 0x13;
+  iVar5 = iVar4 << 0x10;
+  if (0x10 < iVar4) {
+    iVar5 = 0x100000;
+  }
+  iVar4 = 0;
+  if (0 < iVar5 >> 0x10) {
+    do {
+      local_20._0_2_ = (short)((iVar4 << 0x10) >> 0xc) + -8;
+      FUN_800578f4(&DAT_800acb80,(short *)local_20,(uint *)(DAT_800cbb94 + 4));
+      iVar4 = iVar4 + 1;
+    } while (iVar4 * 0x10000 >> 0x10 < iVar5 >> 0x10);
+  }
+  iVar4 = 0;
+  do {
+    local_20._0_2_ = (short)((iVar4 << 0x10) >> 0xc) + -8;
+    FUN_800578f4(&DAT_800acb7c,(short *)local_20,(uint *)(DAT_800cbb94 + 4));
+    iVar4 = iVar4 + 1;
+  } while (iVar4 * 0x10000 >> 0x10 < 0x10);
+  return;
+}
+

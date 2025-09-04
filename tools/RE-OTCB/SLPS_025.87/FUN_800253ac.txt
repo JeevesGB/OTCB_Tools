@@ -1,0 +1,35 @@
+
+void FUN_800253ac(void)
+
+{
+  undefined2 uVar1;
+  int iVar2;
+  int iVar3;
+  short sVar4;
+  int iVar5;
+  
+  iVar5 = 0;
+  iVar2 = 0;
+  do {
+    iVar2 = iVar2 >> 0x10;
+    sVar4 = (&DAT_800acdca)[iVar2 * 3];
+    uVar1 = (&DAT_800acdcc)[iVar2 * 3];
+    if ((&DAT_800acdc8)[iVar2 * 3] != 0) {
+      iVar3 = FUN_800a018c((&PTR_s_REVERS_800acd9c)
+                           [*(short *)(&DAT_800ace94 + iVar2 * 2 + DAT_800cbb54 * 0x16)]);
+      sVar4 = sVar4 + (short)iVar3 * -0xe;
+    }
+    FUN_80058620((&PTR_s_REVERS_800acd9c)
+                 [*(short *)(&DAT_800ace94 + iVar2 * 2 + DAT_800cbb54 * 0x16)],sVar4,uVar1);
+    iVar5 = iVar5 + 1;
+    iVar2 = iVar5 * 0x10000;
+  } while (iVar5 * 0x10000 >> 0x10 < 0xb);
+  iVar2 = 0;
+  do {
+    FUN_8002af88(&DAT_800acb8c,(undefined2 *)(&DAT_800acb94 + ((iVar2 << 0x10) >> 0xd)),
+                 (uint *)(DAT_800cbb94 + 4));
+    iVar2 = iVar2 + 1;
+  } while (iVar2 * 0x10000 >> 0x10 < 0x12);
+  return;
+}
+

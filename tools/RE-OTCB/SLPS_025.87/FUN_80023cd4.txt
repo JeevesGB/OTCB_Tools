@@ -1,0 +1,53 @@
+
+void FUN_80023cd4(void)
+
+{
+  short sVar1;
+  undefined2 uVar2;
+  undefined2 *puVar3;
+  undefined4 *puVar4;
+  
+  puVar3 = &DAT_800cbb18;
+  puVar4 = &DAT_800cd6a8;
+  do {
+    sVar1 = *(short *)(puVar4 + 2);
+    if (sVar1 == 0x30) {
+LAB_80023d5c:
+      *puVar3 = 0;
+    }
+    else {
+      if (0x30 < sVar1) {
+        if (((sVar1 != 0x50) && (0x50 < sVar1)) && (sVar1 != 0x60)) {
+          uVar2 = 1;
+          if (sVar1 == 0x70) goto LAB_80023d64;
+          *puVar3 = 0;
+          goto LAB_80023d68;
+        }
+        goto LAB_80023d5c;
+      }
+      if (sVar1 == 0x10) goto LAB_80023d5c;
+      if (sVar1 < 0x11) {
+        uVar2 = 3;
+        if (sVar1 == 0) {
+LAB_80023d64:
+          *puVar3 = uVar2;
+        }
+        else {
+          *puVar3 = 0;
+        }
+      }
+      else {
+        uVar2 = 2;
+        if (sVar1 == 0x20) goto LAB_80023d64;
+        *puVar3 = 0;
+      }
+    }
+LAB_80023d68:
+    puVar3 = puVar3 + 1;
+    puVar4 = puVar4 + 3;
+    if (-0x7ff344e5 < (int)puVar3) {
+      return;
+    }
+  } while( true );
+}
+

@@ -1,0 +1,46 @@
+
+void FUN_80024720(void)
+
+{
+  short local_28 [2];
+  undefined4 uStack_24;
+  
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb62 == 0));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + DAT_800acafc * 0x14),0xfff4,0xffbc,
+               (uint *)(DAT_800cbb94 + 4),local_28[0],-1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb62 == 1));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + DAT_800acafe * 0x14),0x3e,0xffc2,
+               (uint *)(DAT_800cbb94 + 4),local_28[0],-1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb62 == 2));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + DAT_800acb00 * 0x14),0x76,0xffbc,
+               (uint *)(DAT_800cbb94 + 4),local_28[0],-1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb62 == 3));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + DAT_800acb02 * 0x14),0xcc,0xffbc,
+               (uint *)(DAT_800cbb94 + 4),local_28[0],-1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb88 != 0));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + 0x104),0xc,0xffdc,(uint *)(DAT_800cbb94 + 4),
+               local_28[0],-1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb88 == 0));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + 0x118),0xa8,0xffdc,(uint *)(DAT_800cbb94 + 4),
+               local_28[0],-1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb86 != 0));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + 0x104),0xc,0xfffc,(uint *)(DAT_800cbb94 + 4),
+               local_28[0],-1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb86 == 0));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + 0x118),0xa8,0xfffc,(uint *)(DAT_800cbb94 + 4),
+               local_28[0],-1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb6c != 0));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + 0x104),0xc,0x1c,(uint *)(DAT_800cbb94 + 4),local_28[0],
+               -1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb6c == 0));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + 0x118),0xa8,0x1c,(uint *)(DAT_800cbb94 + 4),local_28[0]
+               ,-1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb6e != 0));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + 0x104),0xc,0x3c,(uint *)(DAT_800cbb94 + 4),local_28[0],
+               -1,-1);
+  FUN_80066328((undefined4 *)local_28,&uStack_24,0,(uint)(DAT_800cbb6e == 0));
+  FUN_80057730((undefined1 *)(DAT_800cbae0 + 0x118),0xa8,0x3c,(uint *)(DAT_800cbb94 + 4),local_28[0]
+               ,-1,-1);
+  return;
+}
+
