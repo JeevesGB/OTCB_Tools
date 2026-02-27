@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QFileDialog,
-    QLabel, QPushButton, QListWidget, QListWidgetItem,
+    QLabel, QPushButton, QTreeWidget, QTreeWidgetItem,
     QVBoxLayout, QHBoxLayout, QMessageBox, QSplitter
 )
 from PyQt6.QtGui import QPixmap
@@ -17,7 +17,11 @@ class TIMTool(QMainWindow):
         self.resize(1200, 750)
 
         self.bin_path = None
-        self.png_dir = "extracted_tim"
+        self.folder_path = None
+
+        # Output folder relative to script
+        self.png_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extracted_tims")
+        os.makedirs(self.png_dir, exist_ok=True)
 
         self.build_ui()
         self.apply_style()
@@ -28,28 +32,37 @@ class TIMTool(QMainWindow):
 
         layout = QVBoxLayout(central)
 
+        # Top toolbar
         bar = QHBoxLayout()
-        self.btn_open = QPushButton("📦 Open BIN")
+        self.btn_open_bin = QPushButton("📦 Open BIN")
         self.btn_extract = QPushButton("⬇ Extract")
         self.btn_rebuild = QPushButton("🔁 Rebuild BIN")
+        self.btn_open_folder = QPushButton("📁 Open Image Folder")
+        self.btn_open_explorer = QPushButton("📂 Open Folder in Explorer")
 
-        self.btn_open.clicked.connect(self.open_bin)
+        self.btn_open_bin.clicked.connect(self.open_bin)
         self.btn_extract.clicked.connect(self.extract)
         self.btn_rebuild.clicked.connect(self.rebuild)
+        self.btn_open_folder.clicked.connect(self.select_folder)
+        self.btn_open_explorer.clicked.connect(self.open_folder_in_explorer)
 
-        bar.addWidget(self.btn_open)
+        bar.addWidget(self.btn_open_bin)
         bar.addWidget(self.btn_extract)
         bar.addWidget(self.btn_rebuild)
+        bar.addWidget(self.btn_open_folder)
+        bar.addWidget(self.btn_open_explorer)
         bar.addStretch()
         layout.addLayout(bar)
 
+        # Splitter for tree view and preview
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
-        self.list = QListWidget()
-        self.list.currentItemChanged.connect(self.preview)
-        splitter.addWidget(self.list)
+        self.tree = QTreeWidget()
+        self.tree.setHeaderHidden(True)
+        self.tree.itemClicked.connect(self.preview)
+        splitter.addWidget(self.tree)
 
-        self.preview_label = QLabel("Select a texture")
+        self.preview_label = QLabel("Select an image")
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.preview_label.setStyleSheet("background:#111; border-radius:10px;")
         splitter.addWidget(self.preview_label)
@@ -72,12 +85,15 @@ class TIMTool(QMainWindow):
         }
         QPushButton:hover { background: #3a3a3a; }
         QPushButton:pressed { background: #0078d4; }
-        QListWidget {
+        QTreeWidget {
             background: #252526;
             border-radius: 8px;
         }
         """)
 
+    # -----------------------------
+    # BIN Extraction / Rebuild
+    # -----------------------------
     def open_bin(self):
         path, _ = QFileDialog.getOpenFileName(self, "Open BIN", "", "BIN files (*.bin)")
         if path:
@@ -88,34 +104,45 @@ class TIMTool(QMainWindow):
         if not self.bin_path:
             QMessageBox.warning(self, "Error", "Open a BIN first")
             return
-
         extract_bin(self.bin_path, self.png_dir)
-        self.load_pngs()
+        self.folder_path = self.png_dir
+        self.load_images()
 
     def rebuild(self):
         if not self.bin_path:
             return
-
         out, _ = QFileDialog.getSaveFileName(self, "Save BIN", "CAR_MOD.BIN", "BIN files (*.bin)")
         if out:
             rebuild_bin(self.bin_path, self.png_dir, out)
             QMessageBox.information(self, "Done", "BIN rebuilt")
 
-    def load_pngs(self):
-        self.list.clear()
-        if not os.path.isdir(self.png_dir):
+    # -----------------------------
+    # Folder / Image Viewer
+    # -----------------------------
+    def select_folder(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Image Folder", "")
+        if folder:
+            self.folder_path = folder
+            self.load_images()
+
+    def load_images(self):
+        self.tree.clear()
+        if not self.folder_path:
             return
 
-        for f in sorted(os.listdir(self.png_dir)):
-            if f.endswith(".png"):
-                item = QListWidgetItem(f)
-                item.setData(Qt.ItemDataRole.UserRole, os.path.join(self.png_dir, f))
-                self.list.addItem(item)
+        for f in sorted(os.listdir(self.folder_path)):
+            if f.lower().endswith((".png", ".jpg", ".jpeg", ".bmp")):
+                item = QTreeWidgetItem([f])
+                item.setData(0, Qt.ItemDataRole.UserRole, os.path.join(self.folder_path, f))
+                self.tree.addTopLevelItem(item)
 
-    def preview(self, item):
+        self.preview_label.setText("Select an image")
+
+    def preview(self, item, column=None):
         if not item:
             return
-        pix = QPixmap(item.data(Qt.ItemDataRole.UserRole))
+        path = item.data(0, Qt.ItemDataRole.UserRole)
+        pix = QPixmap(path)
         self.preview_label.setPixmap(
             pix.scaled(
                 self.preview_label.size(),
@@ -124,8 +151,15 @@ class TIMTool(QMainWindow):
             )
         )
 
+    def open_folder_in_explorer(self):
+        if self.folder_path and os.path.exists(self.folder_path):
+            os.startfile(self.folder_path)
+        else:
+            QMessageBox.warning(self, "Error", "No folder selected or folder does not exist")
+
     def resizeEvent(self, e):
-        self.preview(self.list.currentItem())
+        self.preview(self.tree.currentItem())
+        super().resizeEvent(e)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
