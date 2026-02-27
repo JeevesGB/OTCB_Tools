@@ -120,7 +120,9 @@ def tim_to_image(tim):
 # BIN → PNG Extraction
 # ==============================
 
-def extract_bin(bin_path, out_dir):
+def extract_bin(bin_path, out_root):
+    bin_name = os.path.splitext(os.path.basename(bin_path))[0]
+    out_dir = os.path.join(out_root, bin_name)
     os.makedirs(out_dir, exist_ok=True)
 
     with open(bin_path, "rb") as f:
@@ -132,8 +134,17 @@ def extract_bin(bin_path, out_dir):
         tim = parse_tim(data, off)
         img = tim_to_image(tim)
 
-        name = f"tim_{i:03d}_bpp{tim.bpp}_{img.width}x{img.height}.png"
-        img.save(os.path.join(out_dir, name))
+        w = img.width
+        h = img.height
+
+        base = f"tim_{i:03d}_bpp{tim.bpp}_{w}x{h}"
+
+        # ---- save PNG ----
+        img.save(os.path.join(out_dir, base + ".png"))
+
+        # ---- save raw TIM ----
+        with open(os.path.join(out_dir, base + ".tim"), "wb") as f:
+            f.write(data[off:tim.end])
 
 # ==============================
 # PNG → TIM Rebuild (SAFE)
