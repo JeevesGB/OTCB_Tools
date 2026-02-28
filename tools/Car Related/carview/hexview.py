@@ -1,4 +1,3 @@
-# hexview.py
 from PyQt6.QtWidgets import QPlainTextEdit
 
 class HexView(QPlainTextEdit):

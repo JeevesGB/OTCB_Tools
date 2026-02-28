@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QFormLayout, QSpinBox
 
-# Known / suspected tuning offsets (example)
+# Suspected tuning offsets
 TUNING_FIELDS = {
     "Mass":        (0x40, -32768, 32767),
     "Power":       (0x42, 0, 2000),
