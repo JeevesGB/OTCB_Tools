@@ -1,12 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QFormLayout, QSpinBox
-
-# Suspected tuning offsets
-TUNING_FIELDS = {
-    "Mass":        (0x40, -32768, 32767),
-    "Power":       (0x42, 0, 2000),
-    "Top Speed":   (0x44, 0, 400),
-    "Gear Ratio":  (0x48, 0, 1000),
-}
+from PyQt6.QtWidgets import QWidget, QFormLayout, QDoubleSpinBox
 
 class TuningEditor(QWidget):
     def __init__(self):
@@ -15,17 +7,17 @@ class TuningEditor(QWidget):
         self.fields = {}
 
     def load(self, car):
-        self.car = car
-        self.fields.clear()
-        while self.layout.rowCount():
-            self.layout.removeRow(0)
+        self.layout.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapAllRows)
 
-        for name, (offset, mn, mx) in TUNING_FIELDS.items():
-            spin = QSpinBox()
-            spin.setRange(mn, mx)
-            spin.setValue(car.s16(offset))
-            spin.valueChanged.connect(
-                lambda v, o=offset: car.write_s16(o, v)
-            )
-            self.fields[name] = spin
-            self.layout.addRow(name, spin)
+        # Heuristic scan: floats near sane ranges
+        for offset in range(0, len(car.data), 4):
+            val = car.read_float(offset)
+            if 0.1 < val < 2000:
+                spin = QDoubleSpinBox()
+                spin.setRange(-10000, 10000)
+                spin.setValue(val)
+                spin.valueChanged.connect(
+                    lambda v, o=offset: car.write_float(o, v)
+                )
+                self.layout.addRow(f"@{hex(offset)}", spin)
+                self.fields[offset] = spin

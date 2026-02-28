@@ -1,4 +1,14 @@
+import os
+os.environ["QT_OPENGL"] = "desktop"
 import sys
+from PyQt6.QtGui import QSurfaceFormat
+
+fmt = QSurfaceFormat()
+fmt.setRenderableType(QSurfaceFormat.RenderableType.OpenGL)
+fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CompatibilityProfile)
+fmt.setVersion(2, 1)
+fmt.setDepthBufferSize(24)
+QSurfaceFormat.setDefaultFormat(fmt)
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QSplitter, QTreeView,
      QTabWidget
@@ -57,8 +67,14 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    with open("style.qss") as f:
-        app.setStyleSheet(f.read())
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    STYLE_PATH = os.path.join(BASE_DIR, "style.qss")
+
+    if os.path.exists(STYLE_PATH):
+        with open(STYLE_PATH, "r", encoding="utf-8") as f:
+            app.setStyleSheet(f.read())
+    else:
+        print("Warning: style.qss not found")
 
     w = MainWindow()
     w.resize(1200, 700)
