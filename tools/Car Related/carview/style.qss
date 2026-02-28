@@ -1,0 +1,30 @@
+QWidget {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-size: 12px;
+}
+
+QTreeView {
+    background-color: #1b1b1b;
+    border-right: 1px solid #333;
+}
+
+QTabWidget::pane {
+    border: 1px solid #333;
+}
+
+QTabBar::tab {
+    background: #1e1e1e;
+    padding: 6px;
+    border: 1px solid #333;
+}
+
+QTabBar::tab:selected {
+    background: #2d2d2d;
+}
+
+QSpinBox {
+    background-color: #1e1e1e;
+    border: 1px solid #444;
+    padding: 4px;
+}
