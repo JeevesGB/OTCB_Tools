@@ -1,5 +1,6 @@
 import os
 os.environ["QT_OPENGL"] = "desktop"
+
 import sys
 from PyQt6.QtGui import QSurfaceFormat
 
@@ -9,17 +10,21 @@ fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CompatibilityProfile)
 fmt.setVersion(2, 1)
 fmt.setDepthBufferSize(24)
 QSurfaceFormat.setDefaultFormat(fmt)
+
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QSplitter, QTreeView,
-     QTabWidget
+    QTabWidget
 )
-from  PyQt6.QtGui import QFileSystemModel
+from PyQt6.QtGui import QFileSystemModel
 from PyQt6.QtCore import QDir
 
 from carfile import CarFile
 from viewer import Viewer
 from tuning import TuningEditor
 from hexview import HexView
+
+from uianim import UIAnimator
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -29,7 +34,6 @@ class MainWindow(QMainWindow):
         splitter = QSplitter()
         self.setCentralWidget(splitter)
 
-        # Left: file browser
         model = QFileSystemModel()
         model.setRootPath(QDir.currentPath())
         model.setNameFilters(["*.CAR", "*.car"])
@@ -42,7 +46,6 @@ class MainWindow(QMainWindow):
 
         splitter.addWidget(self.tree)
 
-        # Right: tabs
         self.tabs = QTabWidget()
         self.viewer = Viewer()
         self.tuning = TuningEditor()
@@ -55,14 +58,23 @@ class MainWindow(QMainWindow):
         splitter.addWidget(self.tabs)
         splitter.setSizes([300, 900])
 
+        self.animator = UIAnimator(self)
+
     def load_car(self, index):
         path = index.model().filePath(index)
         if not path.lower().endswith(".car"):
             return
 
         self.car = CarFile(path)
+
         self.tuning.load(self.car)
         self.hexview.load(self.car.data)
+
+        self.tabs.setCurrentIndex(0)
+
+        if hasattr(self, "animator"):
+            self.animator.animate_content_fade(self.viewer)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -79,4 +91,5 @@ if __name__ == "__main__":
     w = MainWindow()
     w.resize(1200, 700)
     w.show()
+
     sys.exit(app.exec())

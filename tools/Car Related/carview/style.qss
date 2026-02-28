@@ -1,30 +1,74 @@
+/* Global */
 QWidget {
-    background-color: #121212;
-    color: #e0e0e0;
-    font-size: 12px;
+    background-color: #0f1115;
+    color: #e6e6e6;
+    font-family: "Segoe UI", "Inter", sans-serif;
+    font-size: 13px;
 }
 
+/* Tree View */
 QTreeView {
-    background-color: #1b1b1b;
-    border-right: 1px solid #333;
-}
-
-QTabWidget::pane {
-    border: 1px solid #333;
-}
-
-QTabBar::tab {
-    background: #1e1e1e;
+    background-color: #151821;
+    border-right: 1px solid #252a34;
     padding: 6px;
-    border: 1px solid #333;
+    alternate-background-color: #1a1f2b;
+}
+
+QTreeView::item {
+    padding: 6px 8px;
+    border-radius: 4px;
+}
+
+QTreeView::item:hover {
+    background-color: #222838;
+}
+
+QTreeView::item:selected {
+    background-color: #2f6feb;
+    color: #ffffff;
+}
+
+/* Tab Widget */
+QTabWidget::pane {
+    border: 1px solid #252a34;
+    border-radius: 6px;
+    margin-top: -1px;
+}
+
+/* Tabs */
+QTabBar::tab {
+    background: #1a1f2b;
+    padding: 8px 14px;
+    margin-right: 4px;
+    border: 1px solid #252a34;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+QTabBar::tab:hover {
+    background: #222838;
 }
 
 QTabBar::tab:selected {
-    background: #2d2d2d;
+    background: #2f6feb;
+    color: white;
+    border-color: #2f6feb;
 }
 
+/* SpinBox */
 QSpinBox {
-    background-color: #1e1e1e;
-    border: 1px solid #444;
-    padding: 4px;
+    background-color: #1a1f2b;
+    border: 1px solid #2a2f3a;
+    border-radius: 6px;
+    padding: 6px 8px;
+    min-height: 24px;
+}
+
+QSpinBox:hover {
+    border: 1px solid #2f6feb;
+}
+
+QSpinBox:focus {
+    border: 1px solid #2f6feb;
+    background-color: #202637;
 }
