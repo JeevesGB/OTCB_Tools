@@ -13,7 +13,7 @@ from tim_core import extract_bin, rebuild_bin
 class TIMTool(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("OTCB TIM Tool")
+        self.setWindowTitle(".BIN Ripper")
         self.resize(1200, 750)
 
         self.bin_path = None
@@ -32,7 +32,6 @@ class TIMTool(QMainWindow):
 
         layout = QVBoxLayout(central)
 
-        # Top toolbar
         bar = QHBoxLayout()
         self.btn_open_bin = QPushButton("📦 Open BIN")
         self.btn_extract = QPushButton("⬇ Extract")
@@ -54,7 +53,6 @@ class TIMTool(QMainWindow):
         bar.addStretch()
         layout.addLayout(bar)
 
-        # Splitter for tree view and preview
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
         self.tree = QTreeWidget()
