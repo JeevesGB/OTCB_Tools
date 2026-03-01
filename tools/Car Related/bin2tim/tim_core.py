@@ -8,9 +8,15 @@ from PIL import Image
 # ==============================
 
 def bgr555_to_rgb(c):
-    r = ((c >> 10) & 0x1F) << 3
-    g = ((c >> 5) & 0x1F) << 3
-    b = (c & 0x1F) << 3
+    r5 = (c >> 0) & 0x1F
+    g5 = (c >> 5) & 0x1F
+    b5 = (c >> 10) & 0x1F
+
+    # expand 5-bit to 8-bit properly
+    r = (r5 << 3) | (r5 >> 2)
+    g = (g5 << 3) | (g5 >> 2)
+    b = (b5 << 3) | (b5 >> 2)
+
     return (r, g, b)
 
 def rgb_to_bgr555(r, g, b):
