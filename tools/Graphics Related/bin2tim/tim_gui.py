@@ -3,12 +3,13 @@ import os
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QFileDialog,
     QLabel, QPushButton, QTreeWidget, QTreeWidgetItem,
-    QVBoxLayout, QHBoxLayout, QMessageBox, QSplitter
+    QVBoxLayout, QHBoxLayout, QSplitter, QMessageBox
 )
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
+from PIL.ImageQt import ImageQt  # Add this import
 
-from tim_core import extract_bin, rebuild_bin
+from tim_core import extract_bin, rebuild_bin, parse_tim, tim_to_image
 
 STYLE = "styles.qss"
 
@@ -20,6 +21,7 @@ class TIMTool(QMainWindow):
 
         self.bin_path = None
         self.folder_path = None
+        self.current_tim = None  # Store the current TIM object
 
         # Output folder relative to script
         self.png_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extracted_tims")
@@ -55,24 +57,41 @@ class TIMTool(QMainWindow):
         bar.addStretch()
         layout.addLayout(bar)
 
+        # Create the splitter with horizontal orientation
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
+        # Left section: file tree and image details below it
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
+
+        # File tree
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
         self.tree.itemClicked.connect(self.preview)
-        splitter.addWidget(self.tree)
+        left_layout.addWidget(self.tree)
+
+        # Image info section below the tree
+        self.image_info = QLabel("Image Details: Not selected")
+        self.image_info.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.image_info.setWordWrap(True)  # Allow wrapping of text if it gets long
+        left_layout.addWidget(self.image_info)
+
+        splitter.addWidget(left_widget)
+
+        # Right section: image preview
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
 
         self.preview_label = QLabel("Select an image")
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.preview_label.setStyleSheet("background:#111; border-radius:10px;")
-        splitter.addWidget(self.preview_label)
+        right_layout.addWidget(self.preview_label)
 
-        # Image details display
-        self.image_info = QLabel("Image Details: Not selected")
-        self.image_info.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        layout.addWidget(self.image_info)
+        splitter.addWidget(right_widget)
 
-        splitter.setSizes([350, 850])
+        # Set the initial sizes for the left and right sections (tree view and image preview)
+        splitter.setSizes([350, 850])  # Image info takes 100 pixels, image preview takes 850 pixels
+
         layout.addWidget(splitter)
 
     def apply_style(self):
@@ -127,38 +146,61 @@ class TIMTool(QMainWindow):
             return
 
         for f in sorted(os.listdir(self.folder_path)):
-            if f.lower().endswith((".png", ".jpg", ".jpeg", ".bmp")):
+            if f.lower().endswith(".tim"):
                 item = QTreeWidgetItem([f])
                 item.setData(0, Qt.ItemDataRole.UserRole, os.path.join(self.folder_path, f))
                 self.tree.addTopLevelItem(item)
 
-        self.preview_label.setText("Select an image")
+        self.preview_label.setText("Select a TIM file")
 
     def preview(self, item, column=None):
         if not item:
             return
         path = item.data(0, Qt.ItemDataRole.UserRole)
-        pix = QPixmap(path)
-        self.preview_label.setPixmap(
-            pix.scaled(
-                self.preview_label.size(),
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
+
+        # Parse the TIM file and extract its information
+        tim_data = open(path, 'rb').read()
+        tim = parse_tim(tim_data, 0)  # Parse the TIM file from the start
+        self.current_tim = tim
+
+        # Decode the TIM image into a QPixmap
+        img = tim_to_image(tim)
+
+        if img:
+            # Convert PIL image to QPixmap using ImageQt
+            qt_img = ImageQt(img)  # Convert PIL Image to QPixmap
+            pixmap = QPixmap.fromImage(qt_img)  # Convert QImage to QPixmap
+
+            # Set the scaled image to the preview label
+            self.preview_label.setPixmap(
+                pixmap.scaled(
+                    self.preview_label.size(),
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation
+                )
             )
-        )
 
         # Display image details
-        self.display_image_info(path)
+        self.display_image_info(path, tim)
 
-    def display_image_info(self, path):
-        pixmap = QPixmap(path)
-        width = pixmap.width()
-        height = pixmap.height()
+    def display_image_info(self, path, tim):
+        if tim is None:
+            self.image_info.setText("Invalid TIM file")
+            return
+
+        width = tim.image["w_words"] * (16 // tim.bpp)  # Calculate width in pixels
+        height = tim.image["h"]  # Height in pixels
         file_size = os.path.getsize(path) // 1024  # in KB
 
         info_text = f"File: {os.path.basename(path)}\n"
         info_text += f"Dimensions: {width}x{height}\n"
-        info_text += f"Size: {file_size} KB"
+        info_text += f"Size: {file_size} KB\n"
+        info_text += f"BPP: {tim.bpp}\n"
+        info_text += f"CLUT present: {'Yes' if tim.has_clut else 'No'}\n"
+        if tim.has_clut:
+            info_text += f"CLUT size: {len(tim.clut['data'])} bytes\n"
+        else:
+            info_text += f"CLUT: None\n"
 
         self.image_info.setText(info_text)
 
@@ -167,10 +209,6 @@ class TIMTool(QMainWindow):
             os.startfile(self.folder_path)
         else:
             QMessageBox.warning(self, "Error", "No folder selected or folder does not exist")
-
-    def resizeEvent(self, e):
-        self.preview(self.tree.currentItem())
-        super().resizeEvent(e)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
