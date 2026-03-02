@@ -7,11 +7,11 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
-from PIL.ImageQt import ImageQt  # Add this import
+from PIL.ImageQt import ImageQt  
 
 from tim_core import extract_bin, rebuild_bin, parse_tim, tim_to_image
 
-STYLE = "styles.qss"
+STYLE = "style.qss"
 
 class TIMTool(QMainWindow):
     def __init__(self):
@@ -21,9 +21,8 @@ class TIMTool(QMainWindow):
 
         self.bin_path = None
         self.folder_path = None
-        self.current_tim = None  # Store the current TIM object
+        self.current_tim = None 
 
-        # Output folder relative to script
         self.png_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extracted_tims")
         os.makedirs(self.png_dir, exist_ok=True)
 
@@ -57,28 +56,23 @@ class TIMTool(QMainWindow):
         bar.addStretch()
         layout.addLayout(bar)
 
-        # Create the splitter with horizontal orientation
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
-        # Left section: file tree and image details below it
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
-        # File tree
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
         self.tree.itemClicked.connect(self.preview)
         left_layout.addWidget(self.tree)
 
-        # Image info section below the tree
         self.image_info = QLabel("Image Details: Not selected")
         self.image_info.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.image_info.setWordWrap(True)  # Allow wrapping of text if it gets long
+        self.image_info.setWordWrap(True)  
         left_layout.addWidget(self.image_info)
 
         splitter.addWidget(left_widget)
 
-        # Right section: image preview
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
@@ -89,20 +83,18 @@ class TIMTool(QMainWindow):
 
         splitter.addWidget(right_widget)
 
-        # Set the initial sizes for the left and right sections (tree view and image preview)
-        splitter.setSizes([350, 850])  # Image info takes 100 pixels, image preview takes 850 pixels
+        
+        splitter.setSizes([350, 850]) 
 
         layout.addWidget(splitter)
 
     def apply_style(self):
-        # Get the absolute path of the current script's directory
         script_dir = os.path.dirname(os.path.abspath(__file__))
         qss_file_path = os.path.join(script_dir, STYLE)
 
-        # Now open the file using the correct path
         try:
             with open(qss_file_path, "r") as f:
-                self.setStyleSheet(f.read())  # Apply the stylesheet to the window
+                self.setStyleSheet(f.read())  
         except FileNotFoundError:
             print(f"Error: The file {qss_file_path} was not found.")
 
@@ -158,20 +150,16 @@ class TIMTool(QMainWindow):
             return
         path = item.data(0, Qt.ItemDataRole.UserRole)
 
-        # Parse the TIM file and extract its information
         tim_data = open(path, 'rb').read()
-        tim = parse_tim(tim_data, 0)  # Parse the TIM file from the start
+        tim = parse_tim(tim_data, 0)  
         self.current_tim = tim
 
-        # Decode the TIM image into a QPixmap
         img = tim_to_image(tim)
 
         if img:
-            # Convert PIL image to QPixmap using ImageQt
-            qt_img = ImageQt(img)  # Convert PIL Image to QPixmap
-            pixmap = QPixmap.fromImage(qt_img)  # Convert QImage to QPixmap
+            qt_img = ImageQt(img)  
+            pixmap = QPixmap.fromImage(qt_img) 
 
-            # Set the scaled image to the preview label
             self.preview_label.setPixmap(
                 pixmap.scaled(
                     self.preview_label.size(),
@@ -180,7 +168,7 @@ class TIMTool(QMainWindow):
                 )
             )
 
-        # Display image details
+       
         self.display_image_info(path, tim)
 
     def display_image_info(self, path, tim):
@@ -188,9 +176,9 @@ class TIMTool(QMainWindow):
             self.image_info.setText("Invalid TIM file")
             return
 
-        width = tim.image["w_words"] * (16 // tim.bpp)  # Calculate width in pixels
-        height = tim.image["h"]  # Height in pixels
-        file_size = os.path.getsize(path) // 1024  # in KB
+        width = tim.image["w_words"] * (16 // tim.bpp) 
+        height = tim.image["h"]  
+        file_size = os.path.getsize(path) // 1024 
 
         info_text = f"File: {os.path.basename(path)}\n"
         info_text += f"Dimensions: {width}x{height}\n"

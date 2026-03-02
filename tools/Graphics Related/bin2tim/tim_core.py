@@ -12,7 +12,6 @@ def bgr555_to_rgb(c):
     g5 = (c >> 5) & 0x1F
     b5 = (c >> 10) & 0x1F
 
-    # expand 5-bit to 8-bit properly
     r = (r5 << 3) | (r5 >> 2)
     g = (g5 << 3) | (g5 >> 2)
     b = (b5 << 3) | (b5 >> 2)
@@ -99,13 +98,12 @@ def tim_to_image(tim):
     h = tim.image["h"]
     data = tim.image["data"]
 
-    # Check if the TIM has a CLUT and decode it if it exists
     if tim.bpp in (4, 8):
         if tim.clut is not None:
             clut = decode_clut(tim.clut["data"])
         else:
             print(f"Warning: TIM at offset {tim.offset} has no CLUT. Skipping.")
-            return None  # Return None if CLUT is missing
+            return None  
 
     if tim.bpp == 4:
         indices = []
@@ -146,17 +144,15 @@ def extract_bin(bin_path, out_root):
         img = tim_to_image(tim)
 
         if img is None:
-            continue  # Skip if image could not be created due to missing CLUT
+            continue  
 
         w = img.width
         h = img.height
 
         base = f"tim_{i:03d}_bpp{tim.bpp}_{w}x{h}"
 
-        # ---- save PNG ----
         img.save(os.path.join(out_dir, base + ".png"))
 
-        # ---- save raw TIM ----
         with open(os.path.join(out_dir, base + ".tim"), "wb") as f:
             f.write(data[off:tim.end])
 
@@ -230,7 +226,6 @@ def rebuild_bin(original_bin, png_dir, out_bin):
         f.write(data)
 
 if __name__ == "__main__":
-    # Example paths for testing
-    bin_path = "path_to_your_bin_file.bin"
+    bin_path = ""
     out_dir = "output_folder"
     extract_bin(bin_path, out_dir)
