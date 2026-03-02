@@ -67,18 +67,23 @@ class TIMTool(QMainWindow):
         self.preview_label.setStyleSheet("background:#111; border-radius:10px;")
         splitter.addWidget(self.preview_label)
 
+        # Image details display
+        self.image_info = QLabel("Image Details: Not selected")
+        self.image_info.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.image_info)
+
         splitter.setSizes([350, 850])
         layout.addWidget(splitter)
 
     def apply_style(self):
-            # Get the absolute path of the current script's directory
+        # Get the absolute path of the current script's directory
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        qss_file_path = os.path.join(script_dir, "styles.qss")
+        qss_file_path = os.path.join(script_dir, STYLE)
 
-    # Now open the file using the correct path
+        # Now open the file using the correct path
         try:
             with open(qss_file_path, "r") as f:
-                self.setStyleSheet(f.read())
+                self.setStyleSheet(f.read())  # Apply the stylesheet to the window
         except FileNotFoundError:
             print(f"Error: The file {qss_file_path} was not found.")
 
@@ -141,6 +146,21 @@ class TIMTool(QMainWindow):
                 Qt.TransformationMode.SmoothTransformation
             )
         )
+
+        # Display image details
+        self.display_image_info(path)
+
+    def display_image_info(self, path):
+        pixmap = QPixmap(path)
+        width = pixmap.width()
+        height = pixmap.height()
+        file_size = os.path.getsize(path) // 1024  # in KB
+
+        info_text = f"File: {os.path.basename(path)}\n"
+        info_text += f"Dimensions: {width}x{height}\n"
+        info_text += f"Size: {file_size} KB"
+
+        self.image_info.setText(info_text)
 
     def open_folder_in_explorer(self):
         if self.folder_path and os.path.exists(self.folder_path):

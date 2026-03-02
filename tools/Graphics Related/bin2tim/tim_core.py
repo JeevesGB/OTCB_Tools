@@ -1,6 +1,5 @@
 import struct
 import os
-import numpy as np
 from PIL import Image
 
 # ==============================
@@ -55,8 +54,13 @@ def parse_tim(data, offset):
 
     tim = TIM(offset)
 
-    bpp_flag = flags & 0x07
-    tim.bpp = {0:4, 1:8, 2:16}[bpp_flag]
+    bpp_flag = flags & 0x07  # Extract bpp flag from flags byte
+    try:
+        tim.bpp = {0:4, 1:8, 2:16}[bpp_flag]  # Map bpp_flag to bpp
+    except KeyError:
+        print(f"Warning: Unexpected bpp flag {bpp_flag} at offset {offset}. Skipping this TIM image.")
+        return None  # Skip images with an unexpected bpp_flag
+
     tim.has_clut = bool(flags & 0x08)
 
     if tim.has_clut:
@@ -95,24 +99,56 @@ def decode_clut(clut_bytes):
     ]
 
 def tim_to_image(tim):
-    w = tim.image["w_words"] * (16 // tim.bpp)
-    h = tim.image["h"]
-    data = tim.image["data"]
+    w = tim.image["w_words"] * (16 // tim.bpp)  # width in pixels
+    h = tim.image["h"]  # height in pixels
+    data = tim.image["data"]  # raw pixel data
 
+    print(f"Decoding image: {w}x{h}, bpp={tim.bpp}")
+
+    # Skip images with invalid dimensions
+    if w == 0 or h == 0:
+        print(f"Warning: TIM at offset {tim.offset} has invalid dimensions (0x0). Skipping this image.")
+        return None  # Skip images with invalid dimensions
+
+    # Ensure the pixel count matches
+    expected_pixel_count = w * h
+    actual_pixel_count = len(data)  # Actual data length in bytes (should be equal to expected pixel count for bpp=8)
+    print(f"Expected pixel count: {expected_pixel_count}, actual data length: {actual_pixel_count}")
+
+    if expected_pixel_count != actual_pixel_count:
+        if actual_pixel_count == 0:
+            print(f"Warning: TIM at offset {tim.offset} has no pixel data. Skipping this image.")
+            return None  # Skip empty or corrupt images
+        elif actual_pixel_count < expected_pixel_count:
+            print(f"Warning: Expected {expected_pixel_count} pixels, but got {actual_pixel_count} bytes of data. Skipping this image.")
+            return None  # Skip images with incomplete data
+        print(f"Warning: Expected {expected_pixel_count} pixels, but got {actual_pixel_count} bytes of data.")
+        raise ValueError(f"Mismatch in pixel count: expected {expected_pixel_count}, got {actual_pixel_count}")
+
+    # Check if the TIM has a CLUT and decode it if it exists (only for bpp=4 or 8)
     if tim.bpp in (4, 8):
-        clut = decode_clut(tim.clut["data"])
+        if tim.clut is not None:
+            clut = decode_clut(tim.clut["data"])
+        else:
+            print(f"Warning: TIM at offset {tim.offset} has no CLUT. Skipping.")
+            return None  # Return None if CLUT is missing
 
+    # Handle the BPP cases
+    pixels = []
     if tim.bpp == 4:
+        # Extract 4bpp pixel indices from the data
         indices = []
         for b in data:
             indices.append(b & 0x0F)
             indices.append(b >> 4)
-        pixels = [clut[i] for i in indices[:w*h]]
+        pixels = [clut[i] for i in indices[:expected_pixel_count]]
 
     elif tim.bpp == 8:
-        pixels = [clut[b] for b in data[:w*h]]
+        # Extract 8bpp pixel indices from the data (1 byte per pixel)
+        pixels = [clut[b] for b in data[:expected_pixel_count]]
 
     else:
+        # For 16bpp, the pixel data is stored directly as RGB565, not using a CLUT
         pixels = [
             bgr555_to_rgb(struct.unpack_from("<H", data, i)[0])
             for i in range(0, len(data), 2)
@@ -138,7 +174,13 @@ def extract_bin(bin_path, out_root):
 
     for i, off in enumerate(offsets):
         tim = parse_tim(data, off)
+        if tim is None:
+            continue  # Skip invalid TIM objects
+
         img = tim_to_image(tim)
+
+        if img is None:
+            continue  # Skip if the image decoding failed
 
         w = img.width
         h = img.height
