@@ -10,6 +10,8 @@ from PyQt6.QtCore import Qt
 
 from tim_core import extract_bin, rebuild_bin
 
+STYLE = "styles.qss"
+
 class TIMTool(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -69,25 +71,16 @@ class TIMTool(QMainWindow):
         layout.addWidget(splitter)
 
     def apply_style(self):
-        self.setStyleSheet("""
-        QWidget {
-            background: #1e1e1e;
-            color: white;
-            font-family: Segoe UI;
-            font-size: 11pt;
-        }
-        QPushButton {
-            background: #2d2d2d;
-            border-radius: 8px;
-            padding: 8px 16px;
-        }
-        QPushButton:hover { background: #3a3a3a; }
-        QPushButton:pressed { background: #0078d4; }
-        QTreeWidget {
-            background: #252526;
-            border-radius: 8px;
-        }
-        """)
+            # Get the absolute path of the current script's directory
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        qss_file_path = os.path.join(script_dir, "styles.qss")
+
+    # Now open the file using the correct path
+        try:
+            with open(qss_file_path, "r") as f:
+                self.setStyleSheet(f.read())
+        except FileNotFoundError:
+            print(f"Error: The file {qss_file_path} was not found.")
 
     # -----------------------------
     # BIN Extraction / Rebuild
