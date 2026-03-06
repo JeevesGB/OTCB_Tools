@@ -4,9 +4,9 @@ V
 navigate to this folder in the terminal and use command 
 
 
-    python run.py 
+    python tim.py 
 
-        or run run.bat located in the bat folder
+        or run tim.bat located in the bat folder
 
 
 

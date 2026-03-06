@@ -1,10 +1,10 @@
 @echo off
 cd /d "%~dp0.."
 
-echo Running CAR TIM extractor...
+echo Running CAR MDL extractor...
 echo.
 
-python run.py
+python mdl.py
 
 echo.
 echo Finished.
