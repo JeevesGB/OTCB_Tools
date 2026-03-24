@@ -1,24 +1,18 @@
-import sys, struct
-from PyQt5 import QtWidgets, QtGui, QtCore
+import sys, struct, ctypes
+import numpy as np
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QOpenGLWidget
 from OpenGL.GL import *
+from OpenGL.GL.shaders import compileProgram, compileShader
 
 HDR_SIZE = 40
 REC_SIZE = 20
 
 
 # ─────────────────────────────
-# PARSER (same logic)
+# PARSER
 # ─────────────────────────────
 def parse_dat(data):
-    header_vals = struct.unpack("<10I", data[:40])
-
-    header = {
-        "id": header_vals[0],
-        "faceCount": header_vals[6],
-        "totalVerts": header_vals[5],
-    }
-
     prims = []
     colors = {}
 
@@ -32,7 +26,6 @@ def parse_dat(data):
         v0 = struct.unpack("<H", c[10:12])[0]
         v1 = struct.unpack("<H", c[12:14])[0]
         v2 = struct.unpack("<H", c[14:16])[0]
-        v3 = struct.unpack("<H", c[16:18])[0]
 
         if r == g == b == 0:
             continue
@@ -43,210 +36,324 @@ def parse_dat(data):
             "i": i,
             "color": (r/255, g/255, b/255),
             "hex": hexcol,
-            "v": [v0, v1, v2, v3],
+            "v": [v0, v1, v2]
         })
 
         colors[hexcol] = colors.get(hexcol, 0) + 1
 
-    return header, prims, colors
+    return prims, colors
 
 
 # ─────────────────────────────
-# OPENGL VIEWPORT
+# SHADERS
+# ─────────────────────────────
+VERT = """
+#version 330
+layout(location=0) in vec3 pos;
+layout(location=1) in vec3 col;
+uniform mat4 mvp;
+out vec3 vcol;
+void main(){
+    gl_Position = mvp * vec4(pos,1);
+    vcol = col;
+}
+"""
+
+FRAG = """
+#version 330
+in vec3 vcol;
+out vec4 frag;
+void main(){
+    frag = vec4(vcol,1);
+}
+"""
+
+
+# ─────────────────────────────
+# OPENGL VIEW
 # ─────────────────────────────
 class GLView(QOpenGLWidget):
-    primSelected = QtCore.pyqtSignal(dict)
+    primSelected = QtCore.pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
         self.prims = []
-        self.zoom = 1.0
-        self.offset = [0, 0]
+        self.verts = None
+
+        self.rotX = 30
+        self.rotY = -40
+        self.dist = 200
+
         self.last = None
+        self.mode = "both"
         self.selected = -1
 
     def set_data(self, prims):
         self.prims = prims
+        self.build()
         self.update()
 
+    def build(self):
+        data = []
+        self.triangles = []
+
+        for p in self.prims:
+            tri = []
+            for v in p["v"]:
+                x = (v & 0xFF)
+                y = (v >> 8)
+                z = (v % 7) * 2
+
+                data += [x, y, z] + list(p["color"])
+                tri.append(np.array([x, y, z], dtype=float))
+
+            self.triangles.append((p["i"], tri))
+
+        self.verts = np.array(data, dtype=np.float32)
+
     def initializeGL(self):
-        glClearColor(0.05, 0.06, 0.07, 1)
+        glEnable(GL_DEPTH_TEST)
+
+        self.shader = compileProgram(
+            compileShader(VERT, GL_VERTEX_SHADER),
+            compileShader(FRAG, GL_FRAGMENT_SHADER)
+        )
+
+        self.vbo = glGenBuffers(1)
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glOrtho(0, w, h, 0, -1, 1)
-        glMatrixMode(GL_MODELVIEW)
 
     def paintGL(self):
-        glClear(GL_COLOR_BUFFER_BIT)
-        glLoadIdentity()
+        glClearColor(0.05, 0.06, 0.07, 1)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        glPushMatrix()
-        glTranslatef(self.offset[0], self.offset[1], 0)
-        glScalef(self.zoom, self.zoom, 1)
+        if self.verts is None:
+            return
 
-        for p in self.prims:
-            x = (p["v"][0] & 0xFF) * 12
-            y = (p["v"][0] >> 8) * 12
+        glUseProgram(self.shader)
 
-            glColor3f(*p["color"])
-            if p["i"] == self.selected:
-                glColor3f(0, 1, 1)
+        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
+        glBufferData(GL_ARRAY_BUFFER, self.verts.nbytes, self.verts, GL_STATIC_DRAW)
 
-            glBegin(GL_LINE_LOOP)
-            glVertex2f(x, y)
-            glVertex2f(x+10, y)
-            glVertex2f(x+10, y+10)
-            glVertex2f(x, y+10)
-            glEnd()
+        glVertexAttribPointer(0, 3, GL_FLOAT, False, 24, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(0)
 
-        glPopMatrix()
+        glVertexAttribPointer(1, 3, GL_FLOAT, False, 24, ctypes.c_void_p(12))
+        glEnableVertexAttribArray(1)
 
-    def mousePressEvent(self, e):
+        mvp = self.mvp()
+        glUniformMatrix4fv(glGetUniformLocation(self.shader, "mvp"), 1, GL_FALSE, mvp)
+
+        if self.mode in ("flat", "both"):
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+            glDrawArrays(GL_TRIANGLES, 0, len(self.verts)//6)
+
+        if self.mode in ("wire", "both"):
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+            glDrawArrays(GL_TRIANGLES, 0, len(self.verts)//6)
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+
+    def mvp(self):
+        aspect = self.width()/max(1,self.height())
+        proj = self.perspective(45, aspect, 0.1, 1000)
+        view = self.translate(0,0,-self.dist)
+        view = view @ self.rotX_m(self.rotX) @ self.rotY_m(self.rotY)
+        return proj @ view
+
+    def perspective(self,f,a,n,f2):
+        t = 1/np.tan(np.radians(f)/2)
+        return np.array([
+            [t/a,0,0,0],
+            [0,t,0,0],
+            [0,0,(f2+n)/(n-f2),-1],
+            [0,0,(2*f2*n)/(n-f2),0]
+        ],dtype=np.float32)
+
+    def translate(self,x,y,z):
+        m = np.eye(4,dtype=np.float32)
+        m[3][:3]=[x,y,z]
+        return m
+
+    def rotX_m(self,a):
+        r=np.radians(a)
+        return np.array([
+            [1,0,0,0],
+            [0,np.cos(r),-np.sin(r),0],
+            [0,np.sin(r),np.cos(r),0],
+            [0,0,0,1]
+        ],dtype=np.float32)
+
+    def rotY_m(self,a):
+        r=np.radians(a)
+        return np.array([
+            [np.cos(r),0,np.sin(r),0],
+            [0,1,0,0],
+            [-np.sin(r),0,np.cos(r),0],
+            [0,0,0,1]
+        ],dtype=np.float32)
+
+    # ───── INPUT ─────
+    def mousePressEvent(self,e):
         self.last = e.pos()
 
-    def mouseMoveEvent(self, e):
-        if self.last:
-            dx = e.x() - self.last.x()
-            dy = e.y() - self.last.y()
-            self.offset[0] += dx
-            self.offset[1] += dy
-            self.last = e.pos()
+    def mouseMoveEvent(self,e):
+        dx = e.x()-self.last.x()
+        dy = e.y()-self.last.y()
+        self.rotY += dx*0.5
+        self.rotX += dy*0.5
+        self.last = e.pos()
+        self.update()
+
+    def mouseReleaseEvent(self,e):
+        self.pick(e.pos())
+
+    def wheelEvent(self,e):
+        self.dist *= 0.9 if e.angleDelta().y()>0 else 1.1
+        self.update()
+
+    # ───── RAY PICKING ─────
+    def pick(self, pos):
+        x = (2*pos.x()/self.width()-1)
+        y = (1-2*pos.y()/self.height())
+
+        inv = np.linalg.inv(self.mvp())
+
+        near = inv @ np.array([x,y,-1,1])
+        far  = inv @ np.array([x,y, 1,1])
+
+        near /= near[3]
+        far  /= far[3]
+
+        dir = far[:3]-near[:3]
+
+        best = None
+        dist = 1e9
+
+        for i,tri in self.triangles:
+            hit = intersect(near[:3],dir,tri)
+            if hit is not None:
+                d = np.linalg.norm(hit-near[:3])
+                if d < dist:
+                    dist = d
+                    best = i
+
+        if best is not None:
+            self.selected = best
+            self.primSelected.emit(best)
             self.update()
 
-    def mouseReleaseEvent(self, e):
-        self.last = None
 
-    def wheelEvent(self, e):
-        self.zoom *= 1.1 if e.angleDelta().y() > 0 else 0.9
-        self.update()
+def intersect(orig,dir,tri):
+    v0,v1,v2 = tri
+    eps = 1e-6
+    e1 = v1-v0
+    e2 = v2-v0
+    h = np.cross(dir,e2)
+    a = np.dot(e1,h)
+    if -eps<a<eps: return None
+    f=1/a
+    s=orig-v0
+    u=f*np.dot(s,h)
+    if u<0 or u>1: return None
+    q=np.cross(s,e1)
+    v=f*np.dot(dir,q)
+    if v<0 or u+v>1: return None
+    t=f*np.dot(e2,q)
+    return orig+dir*t if t>eps else None
 
 
 # ─────────────────────────────
-# INFO PANEL (RIGHT SIDE)
+# INFO PANEL
 # ─────────────────────────────
 class InfoPanel(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        l = QtWidgets.QVBoxLayout(self)
 
-        self.layout = QtWidgets.QVBoxLayout(self)
+        self.sel = QtWidgets.QLabel("—")
+        self.col = QtWidgets.QLabel()
+        self.col.setFixedHeight(40)
+        self.vert = QtWidgets.QLabel()
 
-        self.selLabel = QtWidgets.QLabel("No selection")
-        self.colorBox = QtWidgets.QLabel()
-        self.colorBox.setFixedHeight(40)
+        l.addWidget(QtWidgets.QLabel("Selection"))
+        l.addWidget(self.sel)
+        l.addWidget(QtWidgets.QLabel("Colour"))
+        l.addWidget(self.col)
+        l.addWidget(QtWidgets.QLabel("Vertices"))
+        l.addWidget(self.vert)
+        l.addStretch()
 
-        self.vertLabel = QtWidgets.QLabel()
-
-        self.layout.addWidget(QtWidgets.QLabel("Selection"))
-        self.layout.addWidget(self.selLabel)
-
-        self.layout.addWidget(QtWidgets.QLabel("Colour"))
-        self.layout.addWidget(self.colorBox)
-
-        self.layout.addWidget(QtWidgets.QLabel("Vertices"))
-        self.layout.addWidget(self.vertLabel)
-
-        self.layout.addStretch()
-
-    def update_info(self, prim):
-        if not prim:
-            return
-
-        self.selLabel.setText(f"Primitive #{prim['i']}")
-
-        self.colorBox.setStyleSheet(f"background:{prim['hex']}")
-
-        self.vertLabel.setText(
-            f"V0: {prim['v'][0]}\nV1: {prim['v'][1]}\n"
-            f"V2: {prim['v'][2]}\nV3: {prim['v'][3]}"
-        )
+    def update_info(self,p):
+        self.sel.setText(f"#{p['i']}")
+        self.col.setStyleSheet(f"background:{p['hex']}")
+        self.vert.setText(str(p["v"]))
 
 
 # ─────────────────────────────
-# MAIN WINDOW (FULL LAYOUT)
+# MAIN WINDOW
 # ─────────────────────────────
-class MainWindow(QtWidgets.QMainWindow):
+class Main(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-
-        self.setWindowTitle("OTCB2 DAT Viewer PRO (OpenGL)")
-        self.resize(1600, 900)
+        self.setWindowTitle("OTCB2 DAT Viewer PRO")
+        self.resize(1600,900)
 
         self.gl = GLView()
         self.info = InfoPanel()
 
-        # Sidebar
-        self.tabs = QtWidgets.QTabWidget()
-        self.tabs.setMaximumWidth(300)
-
-        self.primList = QtWidgets.QListWidget()
-        self.tabs.addTab(self.primList, "PRIMS")
-
+        self.list = QtWidgets.QListWidget()
         self.palette = QtWidgets.QListWidget()
-        self.tabs.addTab(self.palette, "PALETTE")
 
-        self.headerBox = QtWidgets.QTextEdit()
-        self.tabs.addTab(self.headerBox, "HEADER")
+        tabs = QtWidgets.QTabWidget()
+        tabs.addTab(self.list,"PRIMS")
+        tabs.addTab(self.palette,"PALETTE")
 
-        # Layout
-        main = QtWidgets.QWidget()
-        layout = QtWidgets.QHBoxLayout(main)
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(tabs,1)
+        layout.addWidget(self.gl,4)
+        layout.addWidget(self.info,1)
 
-        layout.addWidget(self.tabs)
-        layout.addWidget(self.gl, 1)
-        layout.addWidget(self.info)
+        w = QtWidgets.QWidget()
+        w.setLayout(layout)
+        self.setCentralWidget(w)
 
-        self.setCentralWidget(main)
+        # menu
+        act = QtWidgets.QAction("Open",self)
+        act.triggered.connect(self.open)
+        self.menuBar().addMenu("File").addAction(act)
 
-        # Menu
-        openAct = QtWidgets.QAction("Open", self)
-        openAct.triggered.connect(self.open_file)
-        self.menuBar().addMenu("File").addAction(openAct)
+        # connections
+        self.list.currentRowChanged.connect(self.select)
+        self.gl.primSelected.connect(self.select)
 
-        # Signals
-        self.primList.currentRowChanged.connect(self.select_prim)
-
-        self.prims = []
-
-    def open_file(self):
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open DAT", "", "*.dat")
-        if not path:
-            return
-
-        with open(path, "rb") as f:
-            data = f.read()
-
-        header, prims, colors = parse_dat(data)
+    def open(self):
+        path,_=QtWidgets.QFileDialog.getOpenFileName(self,"Open DAT","","*.dat")
+        if not path: return
+        data=open(path,"rb").read()
+        prims,colors = parse_dat(data)
 
         self.prims = prims
         self.gl.set_data(prims)
 
-        self.primList.clear()
+        self.list.clear()
         for p in prims:
-            self.primList.addItem(f"#{p['i']} {p['hex']}")
+            self.list.addItem(f"#{p['i']} {p['hex']}")
 
         self.palette.clear()
-        for c, count in colors.items():
-            self.palette.addItem(f"{c} ({count})")
+        for c,v in colors.items():
+            self.palette.addItem(f"{c} ({v})")
 
-        self.headerBox.setText(str(header))
-
-    def select_prim(self, idx):
-        if idx < 0 or idx >= len(self.prims):
-            return
-
-        p = self.prims[idx]
-        self.gl.selected = idx
+    def select(self,i):
+        if i<0 or i>=len(self.prims): return
+        self.gl.selected=i
         self.gl.update()
-        self.info.update_info(p)
+        self.info.update_info(self.prims[i])
 
 
-# ─────────────────────────────
-# RUN
-# ─────────────────────────────
 app = QtWidgets.QApplication(sys.argv)
-win = MainWindow()
+app.setStyle("Fusion")
+win = Main()
 win.show()
 sys.exit(app.exec_())
