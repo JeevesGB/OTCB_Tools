@@ -21,10 +21,10 @@ class TIMTool(QMainWindow):
 
         self.bin_path = None
         self.folder_path = None
+        self.output_dir = None  # Store the output directory for future conversions
         self.current_tim = None 
-
-        self.png_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extracted_tims")
-        os.makedirs(self.png_dir, exist_ok=True)
+        self.png_dir = None  # Initialize png_dir as None
+        self.zoom_factor = 1.0  # Keep track of the zoom level
 
         self.build_ui()
         self.apply_style()
@@ -41,18 +41,21 @@ class TIMTool(QMainWindow):
         self.btn_rebuild = QPushButton("🔁 Rebuild BIN")
         self.btn_open_folder = QPushButton("📁 Open Image Folder")
         self.btn_open_explorer = QPushButton("📂 Open Folder in Explorer")
+        self.btn_select_output_dir = QPushButton("📂 Select Output Directory")
 
         self.btn_open_bin.clicked.connect(self.open_bin)
         self.btn_extract.clicked.connect(self.extract)
         self.btn_rebuild.clicked.connect(self.rebuild)
         self.btn_open_folder.clicked.connect(self.select_folder)
         self.btn_open_explorer.clicked.connect(self.open_folder_in_explorer)
+        self.btn_select_output_dir.clicked.connect(self.select_output_dir)
 
         bar.addWidget(self.btn_open_bin)
         bar.addWidget(self.btn_extract)
         bar.addWidget(self.btn_rebuild)
         bar.addWidget(self.btn_open_folder)
         bar.addWidget(self.btn_open_explorer)
+        bar.addWidget(self.btn_select_output_dir)
         bar.addStretch()
         layout.addLayout(bar)
 
@@ -71,6 +74,10 @@ class TIMTool(QMainWindow):
         self.image_info.setWordWrap(True)  
         left_layout.addWidget(self.image_info)
 
+        self.zoom_info = QLabel(f"Zoom Scale: {self.zoom_factor*100}%")
+        self.zoom_info.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        left_layout.addWidget(self.zoom_info)
+
         splitter.addWidget(left_widget)
 
         right_widget = QWidget()
@@ -83,7 +90,6 @@ class TIMTool(QMainWindow):
 
         splitter.addWidget(right_widget)
 
-        
         splitter.setSizes([350, 850]) 
 
         layout.addWidget(splitter)
@@ -111,9 +117,24 @@ class TIMTool(QMainWindow):
         if not self.bin_path:
             QMessageBox.warning(self, "Error", "Open a BIN first")
             return
+        
+        # Ask the user where to save the extracted images folder
+        if not self.output_dir:
+            folder = QFileDialog.getExistingDirectory(self, "Select Folder to Save Extracted Images")
+            if folder:
+                self.output_dir = folder
+        if not self.output_dir:
+            QMessageBox.warning(self, "Error", "Please select an output directory first")
+            return
+        
+        # Create a subfolder for "exported-img" inside the selected output directory
+        self.png_dir = os.path.join(self.output_dir, "exported-img")  
+        os.makedirs(self.png_dir, exist_ok=True)  # Create the folder
+
+        # Extract images and save them in the selected folder
         extract_bin(self.bin_path, self.png_dir)
-        self.folder_path = self.png_dir
-        self.load_images()
+        self.folder_path = self.png_dir  # Update the folder path
+        self.load_images()  # Load the images from the new folder
 
     def rebuild(self):
         if not self.bin_path:
@@ -131,6 +152,11 @@ class TIMTool(QMainWindow):
         if folder:
             self.folder_path = folder
             self.load_images()
+
+    def select_output_dir(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Output Directory for Converted Images")
+        if folder:
+            self.output_dir = folder
 
     def load_images(self):
         self.tree.clear()
@@ -160,16 +186,34 @@ class TIMTool(QMainWindow):
             qt_img = ImageQt(img)  
             pixmap = QPixmap.fromImage(qt_img) 
 
-            self.preview_label.setPixmap(
-                pixmap.scaled(
-                    self.preview_label.size(),
-                    Qt.AspectRatioMode.KeepAspectRatio,
-                    Qt.TransformationMode.SmoothTransformation
-                )
-            )
+            self.update_image_display(pixmap)
 
-       
         self.display_image_info(path, tim)
+
+    def update_image_display(self, pixmap):
+        scaled_pixmap = pixmap.scaled(
+            self.preview_label.size() * self.zoom_factor, 
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.preview_label.setPixmap(scaled_pixmap)
+
+    def wheelEvent(self, event):
+        # Zoom in/out on mouse wheel
+        if event.angleDelta().y() > 0:
+            self.zoom_factor += 0.1  # Zoom in
+        else:
+            self.zoom_factor -= 0.1  # Zoom out
+
+        self.zoom_factor = max(0.1, min(self.zoom_factor, 3.0))  # Limit zoom factor
+        if self.current_tim:
+            img = tim_to_image(self.current_tim)
+            if img:
+                qt_img = ImageQt(img)  
+                pixmap = QPixmap.fromImage(qt_img) 
+                self.update_image_display(pixmap)
+
+        self.zoom_info.setText(f"Zoom Scale: {self.zoom_factor*100:.0f}%")
 
     def display_image_info(self, path, tim):
         if tim is None:

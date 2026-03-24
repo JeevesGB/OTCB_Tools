@@ -1,0 +1,214 @@
+=== MDT Parse Debug Log ===
+
+Source:      CENT_14.MDT
+File size:   12960 (0x32A0)
+Body pool:   184 verts @ 0x24F4 base=109
+All verts:   567
+Faces:       176
+Materials:   176
+
+=== NO WARNINGS ===
+
+=== LOG ===
+File ID:      0x000032A0
+Table offset: 0x3244
+BBox (×100u): 33×33×48
+
+Pass 1: Scanning 0x0630–0x3244 for pools
+  Pool @0x2248: 66 verts, base=0
+  Pool @0x23D8: 43 verts, base=66
+  Pool @0x24F4: 184 verts, base=109
+  Pool @0x294C: 91 verts, base=293
+  Pool @0x2BF2: 176 verts, base=384
+  Pool @0x31BD: 7 verts, base=560
+Pass 1 complete: 6 pools, 567 total verts
+
+Body pool: 184 verts @ 0x24F4, base=109
+Pass 2: scanning 0x0630–0x3244
+  QUAD @0x0630 li=[14, 12, 9, 5] tp=151
+  QUAD @0x065C li=[12, 15, 13, 16] tp=213
+  QUAD @0x0688 li=[18, 17, 22, 21] tp=215
+  QUAD @0x06B4 li=[17, 20, 21, 23] tp=215
+  QUAD @0x06E0 li=[24, 25, 27, 26] tp=213
+  QUAD @0x070C li=[1, 15, 4, 19] tp=151
+  QUAD @0x0738 li=[4, 28, 3, 29] tp=20
+  QUAD @0x0764 li=[19, 24, 4, 30] tp=20
+  QUAD @0x0790 li=[14, 25, 19, 24] tp=213
+  QUAD @0x07BC li=[31, 11, 33, 32] tp=22
+  QUAD @0x07E8 li=[10, 34, 11, 32] tp=22
+  QUAD @0x0814 li=[8, 7, 36, 35] tp=149
+  QUAD @0x0840 li=[37, 38, 35, 36] tp=212
+  QUAD @0x086C li=[38, 39, 36, 40] tp=212
+  QUAD @0x0898 li=[39, 41, 40, 42] tp=212
+  QUAD @0x08C4 li=[41, 43, 42, 34] tp=212
+  QUAD @0x08F0 li=[43, 44, 34, 32] tp=215
+  QUAD @0x091C li=[44, 45, 32, 33] tp=215
+  QUAD @0x0948 li=[33, 46, 31, 25] tp=214
+  QUAD @0x0974 li=[26, 46, 48, 47] tp=212
+  QUAD @0x09A0 li=[54, 55, 29, 2] tp=87
+  QUAD @0x09CC li=[55, 56, 2, 0] tp=214
+  QUAD @0x09F8 li=[56, 57, 0, 23] tp=215
+  QUAD @0x0A24 li=[23, 57, 21, 58] tp=215
+  QUAD @0x0A50 li=[23, 20, 0, 1] tp=215
+  QUAD @0x0A7C li=[30, 59, 28, 60] tp=150
+  QUAD @0x0AA8 li=[28, 60, 29, 54] tp=150
+  QUAD @0x0AD4 li=[42, 10, 40, 61] tp=149
+  QUAD @0x0B00 li=[40, 61, 36, 8] tp=149
+  QUAD @0x0B2C li=[50, 49, 26, 27] tp=214
+  QUAD @0x0B58 li=[46, 33, 47, 45] tp=150
+  QUAD @0x0B84 li=[11, 31, 9, 25] tp=85
+  QUAD @0x0BB0 li=[1, 3, 2, 29] tp=214
+  QUAD @0x0BDC li=[53, 62, 59, 63] tp=214
+  QUAD @0x0C08 li=[48, 64, 50, 65] tp=212
+  QUAD @0x0C34 li=[43, 66, 44, 67] tp=215
+  QUAD @0x0C60 li=[44, 67, 45, 68] tp=215
+  QUAD @0x0C8C li=[45, 68, 47, 69] tp=214
+  QUAD @0x0CB8 li=[47, 69, 48, 64] tp=149
+  QUAD @0x0CE4 li=[41, 70, 43, 66] tp=212
+  QUAD @0x0D10 li=[39, 71, 41, 70] tp=212
+  QUAD @0x0D3C li=[57, 72, 58, 73] tp=215
+  QUAD @0x0D68 li=[56, 74, 57, 72] tp=215
+  QUAD @0x0D94 li=[55, 75, 56, 74] tp=214
+  QUAD @0x0DC0 li=[54, 76, 55, 75] tp=87
+  QUAD @0x0DEC li=[50, 65, 51, 77] tp=214
+  QUAD @0x0E18 li=[51, 77, 49, 79] tp=214
+  QUAD @0x0E44 li=[60, 80, 54, 76] tp=86
+  QUAD @0x0E70 li=[59, 63, 60, 80] tp=214
+  QUAD @0x0E9C li=[38, 81, 39, 71] tp=212
+  QUAD @0x0EC8 li=[37, 82, 38, 81] tp=212
+  QUAD @0x0EF4 li=[85, 86, 88, 87] tp=214
+  QUAD @0x0F20 li=[95, 96, 94, 97] tp=85
+  QUAD @0x0F4C li=[98, 93, 68, 69] tp=150
+  QUAD @0x0F78 li=[79, 65, 99, 92] tp=214
+  QUAD @0x0FA4 li=[101, 104, 102, 105] tp=149
+  QUAD @0x0FD0 li=[103, 106, 101, 104] tp=149
+  QUAD @0x0FFC li=[80, 108, 76, 88] tp=150
+  QUAD @0x1028 li=[63, 109, 80, 108] tp=150
+  QUAD @0x1054 li=[111, 112, 86, 113] tp=215
+  QUAD @0x1080 li=[72, 112, 73, 90] tp=215
+  QUAD @0x10AC li=[72, 74, 112, 113] tp=215
+  QUAD @0x10D8 li=[74, 75, 113, 87] tp=214
+  QUAD @0x1104 li=[75, 76, 87, 88] tp=87
+  QUAD @0x1130 li=[93, 92, 69, 64] tp=212
+  QUAD @0x115C li=[93, 98, 94, 95] tp=214
+  QUAD @0x1188 li=[68, 67, 98, 114] tp=215
+  QUAD @0x11B4 li=[67, 66, 114, 107] tp=215
+  QUAD @0x11E0 li=[66, 70, 107, 106] tp=212
+  QUAD @0x120C li=[70, 71, 106, 104] tp=212
+  QUAD @0x1238 li=[71, 81, 104, 105] tp=212
+  QUAD @0x1264 li=[81, 82, 105, 84] tp=212
+  QUAD @0x1290 li=[83, 102, 84, 105] tp=149
+  QUAD @0x12BC li=[107, 103, 114, 96] tp=22
+  QUAD @0x12E8 li=[96, 95, 114, 98] tp=22
+  QUAD @0x1314 li=[94, 115, 89, 116] tp=213
+  QUAD @0x1340 li=[89, 116, 109, 117] tp=20
+  QUAD @0x136C li=[108, 117, 88, 85] tp=20
+  QUAD @0x1398 li=[110, 86, 116, 117] tp=151
+  QUAD @0x13C4 li=[94, 89, 92, 99] tp=213
+  QUAD @0x13F0 li=[111, 118, 112, 90] tp=215
+  QUAD @0x141C li=[118, 119, 90, 91] tp=215
+  QUAD @0x1448 li=[110, 120, 121, 122] tp=213
+  QUAD @0x1474 li=[120, 115, 100, 97] tp=151
+  QUAD @0x14A0 li=[100, 97, 103, 96] tp=149
+  QUAD @0x14CC li=[123, 100, 83, 102] tp=149
+  QUAD @0x14F8 li=[124, 125, 127, 126] tp=214
+  QUAD @0x1524 li=[128, 127, 129, 126] tp=214
+  QUAD @0x1550 li=[128, 129, 124, 125] tp=214
+  QUAD @0x157C li=[128, 130, 127, 131] tp=214
+  QUAD @0x15A8 li=[127, 131, 124, 132] tp=214
+  QUAD @0x15D4 li=[133, 130, 134, 132] tp=214
+  QUAD @0x1600 li=[131, 130, 135, 133] tp=214
+  QUAD @0x162C li=[134, 132, 135, 131] tp=214
+  QUAD @0x1658 li=[136, 137, 139, 138] tp=84
+  QUAD @0x1684 li=[137, 136, 140, 141] tp=21
+  QUAD @0x16B0 li=[142, 143, 145, 144] tp=84
+  QUAD @0x16DC li=[145, 146, 142, 147] tp=21
+  QUAD @0x1708 li=[19, 15, 14, 12] tp=213
+  QUAD @0x1734 li=[110, 116, 120, 115] tp=213
+  WHLQ @0x1760 li=[19, 15, 14, 12] tp=150
+  WHLQ @0x1780 li=[52, 53, 27, 24] tp=148
+  WHLQ @0x17A0 li=[52, 78, 53, 62] tp=148
+  WHLQ @0x17C0 li=[49, 79, 52, 78] tp=214
+  WHLQ @0x17E0 li=[62, 78, 89, 99] tp=148
+  WHLQ @0x1800 li=[110, 116, 120, 115] tp=150
+  SMLT @0x1858 li=[117, 4, 118]
+  SMLT @0x1878 li=[93, 92, 69]
+  SMLT @0x18A8 li=[0, 1, 3]
+  SMLT @0x18C8 li=[5, 4, 7]
+  SMLT @0x18E8 li=[10, 11, 0]
+  WHLQ @0x1918 li=[4, 5, 7, 6] tp=253
+  WHLQ @0x1938 li=[8, 0, 9, 3] tp=253
+  WHLQ @0x1958 li=[1, 4, 2, 7] tp=253
+  WHLQ @0x1978 li=[10, 8, 11, 9] tp=253
+  WHLQ @0x1998 li=[5, 12, 6, 13] tp=253
+  WHLQ @0x19B8 li=[12, 14, 13, 15] tp=253
+  WHLQ @0x19D8 li=[14, 10, 15, 11] tp=253
+  WHLQ @0x19F8 li=[16, 17, 19, 18] tp=124
+  QUAD @0x1A18 li=[0, 1, 3, 2] tp=212
+  QUAD @0x1A44 li=[4, 5, 7, 6] tp=215
+  QUAD @0x1A70 li=[8, 0, 6, 7] tp=215
+  QUAD @0x1A9C li=[9, 10, 8, 11] tp=214
+  QUAD @0x1AC8 li=[10, 12, 11, 13] tp=212
+  QUAD @0x1AF4 li=[12, 14, 13, 15] tp=214
+  QUAD @0x1B20 li=[18, 20, 19, 21] tp=86
+  QUAD @0x1B4C li=[30, 31, 3, 0] tp=212
+  QUAD @0x1B78 li=[13, 15, 11, 17] tp=213
+  QUAD @0x1BA4 li=[8, 11, 0, 1] tp=22
+  QUAD @0x1BD0 li=[19, 32, 17, 33] tp=20
+  QUAD @0x1BFC li=[17, 33, 11, 35] tp=213
+  QUAD @0x1C28 li=[36, 35, 37, 33] tp=213
+  QUAD @0x1C54 li=[31, 30, 39, 38] tp=212
+  QUAD @0x1C80 li=[9, 5, 31, 4] tp=215
+  QUAD @0x1CAC li=[12, 10, 14, 16] tp=213
+  QUAD @0x1CD8 li=[9, 31, 10, 39] tp=22
+  QUAD @0x1D04 li=[18, 16, 41, 40] tp=20
+  QUAD @0x1D30 li=[16, 10, 40, 43] tp=213
+  QUAD @0x1D5C li=[44, 45, 43, 40] tp=213
+  QUAD @0x1D88 li=[46, 47, 39, 43] tp=151
+  QUAD @0x1DB4 li=[68, 1, 69, 35] tp=151
+  WHLQ @0x1DE0 li=[14, 16, 15, 17] tp=148
+  WHLQ @0x1E00 li=[16, 18, 17, 19] tp=214
+  WHLQ @0x1E20 li=[22, 23, 25, 24] tp=87
+  WHLQ @0x1E40 li=[26, 21, 24, 25] tp=87
+  WHLQ @0x1E60 li=[27, 28, 26, 29] tp=215
+  WHLQ @0x1E80 li=[29, 34, 26, 32] tp=215
+  WHLQ @0x1EA0 li=[21, 26, 19, 32] tp=87
+  WHLQ @0x1EC0 li=[27, 23, 20, 22] tp=87
+  WHLQ @0x1EE0 li=[28, 27, 42, 41] tp=215
+  WHLQ @0x1F00 li=[20, 18, 27, 41] tp=87
+  WHLQ @0x1F20 li=[46, 47, 39, 43] tp=124
+  WHLQ @0x1F40 li=[48, 49, 51, 50] tp=124
+  WHLQ @0x1F60 li=[52, 53, 40, 41] tp=124
+  WHLQ @0x1F80 li=[54, 55, 57, 56] tp=124
+  WHLQ @0x1FA0 li=[58, 59, 61, 60] tp=124
+  WHLQ @0x1FC0 li=[62, 33, 63, 32] tp=124
+  WHLQ @0x1FE0 li=[64, 65, 67, 66] tp=124
+  WHLQ @0x2000 li=[68, 1, 69, 35] tp=124
+  WHLQ @0x2020 li=[52, 53, 40, 41] tp=151
+  WHLQ @0x2040 li=[62, 33, 63, 32] tp=151
+  TRI  @0x2060 li=[1, 11, 35] tp=213
+  TRI  @0x2084 li=[39, 43, 10] tp=213
+  SMLT @0x20A8 li=[46, 39, 48]
+  SMLT @0x20C8 li=[52, 40, 54]
+  SMLT @0x20E8 li=[58, 61, 62]
+  SMLT @0x2108 li=[64, 67, 68]
+  WHLQ @0x2128 li=[0, 1, 3, 2] tp=124
+  WHLQ @0x2148 li=[4, 5, 7, 6] tp=253
+  WHLQ @0x2168 li=[8, 9, 11, 10] tp=253
+  WHLQ @0x2188 li=[12, 4, 13, 7] tp=253
+  WHLQ @0x21A8 li=[5, 8, 6, 11] tp=253
+  WHLQ @0x21C8 li=[14, 12, 15, 13] tp=253
+  WHLQ @0x21E8 li=[9, 16, 10, 17] tp=253
+  WHLQ @0x2208 li=[16, 18, 17, 19] tp=253
+  WHLQ @0x2228 li=[18, 14, 19, 15] tp=253
+  >> Switched to pool @0x2248: 66 verts, base=0
+  >> Switched to pool @0x23D8: 43 verts, base=66
+  >> Switched to pool @0x24F4: 184 verts, base=109
+  >> Switched to pool @0x294C: 91 verts, base=293
+  >> Switched to pool @0x2BF2: 176 verts, base=384
+  >> Switched to pool @0x31BD: 7 verts, base=560
+Pass 2 done: 176 faces
+
+=== ALL POOLS FOUND ===
+  0x2248:  66 verts, base=0
+  0x23D8:  43 verts, base=66
