@@ -1,6 +1,6 @@
 import sys, struct, ctypes
 import numpy as np
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QOpenGLWidget
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
@@ -77,8 +77,10 @@ class GLView(QOpenGLWidget):
 
     def __init__(self):
         super().__init__()
+
         self.prims = []
         self.verts = None
+        self.triangles = []   # ✅ FIXED
 
         self.rotX = 30
         self.rotY = -40
@@ -94,8 +96,9 @@ class GLView(QOpenGLWidget):
         self.update()
 
     def build(self):
+        self.triangles = []   # ✅ ALWAYS RESET
+
         data = []
-        self.triangles = []
 
         for p in self.prims:
             tri = []
@@ -199,6 +202,8 @@ class GLView(QOpenGLWidget):
         self.last = e.pos()
 
     def mouseMoveEvent(self,e):
+        if self.last is None:
+            return
         dx = e.x()-self.last.x()
         dy = e.y()-self.last.y()
         self.rotY += dx*0.5
@@ -207,7 +212,16 @@ class GLView(QOpenGLWidget):
         self.update()
 
     def mouseReleaseEvent(self,e):
-        self.pick(e.pos())
+        if self.last is None:
+            return
+
+        dx = abs(e.x() - self.last.x())
+        dy = abs(e.y() - self.last.y())
+
+        if dx < 4 and dy < 4:   # ✅ CLICK threshold
+            self.pick(e.pos())
+
+        self.last = None
 
     def wheelEvent(self,e):
         self.dist *= 0.9 if e.angleDelta().y()>0 else 1.1
@@ -215,6 +229,9 @@ class GLView(QOpenGLWidget):
 
     # ───── RAY PICKING ─────
     def pick(self, pos):
+        if not self.triangles:   # ✅ SAFE GUARD
+            return
+
         x = (2*pos.x()/self.width()-1)
         y = (1-2*pos.y()/self.height())
 
