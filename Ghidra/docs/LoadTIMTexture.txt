@@ -1,0 +1,85 @@
+
+short * LoadTIMTexture(int param_1,short *param_2)
+
+{
+  short sVar1;
+  short sVar2;
+  short sVar3;
+  u_short uVar4;
+  uint tp;
+  int iVar5;
+  int iVar6;
+  short local_30;
+  short local_28;
+  short local_26;
+  short local_20;
+  short local_1e;
+  short local_1c;
+  short local_1a;
+  u_long *local_18;
+  RECT local_10;
+  
+  tp = *(uint *)(param_1 + 4);
+  iVar6 = param_1 + *(int *)(param_1 + 8) + 8;
+  if ((tp & 8) == 0) {
+    local_18 = (u_long *)0x0;
+  }
+  else {
+    local_20 = *(short *)(param_1 + 0xc);
+    local_1e = *(short *)(param_1 + 0xe);
+    local_1c = *(short *)(param_1 + 0x10);
+    local_1a = *(short *)(param_1 + 0x12);
+    local_18 = (u_long *)(param_1 + 0x14);
+  }
+  sVar2 = *(short *)(iVar6 + 4);
+  sVar3 = *(short *)(iVar6 + 6);
+  local_28 = *(short *)(iVar6 + 8);
+  local_26 = *(short *)(iVar6 + 10);
+  if (local_28 == 0) {
+    local_28 = 0x100;
+  }
+  if (local_26 == 0) {
+    local_26 = 0x100;
+  }
+  local_10.w = local_28;
+  local_10.h = local_26;
+  local_10.x = sVar2;
+  local_10.y = sVar3;
+  LoadImage(&local_10,(u_long *)(iVar6 + 0xc));
+  if (param_2 != (short *)0x0) {
+    iVar5 = (int)sVar2;
+    sVar1 = *(short *)(&g_TexPageTable + (tp & 3) * 2);
+    iVar6 = iVar5;
+    if (iVar5 < 0) {
+      iVar6 = iVar5 + 0x3f;
+    }
+    *param_2 = (short)((uint)((iVar5 + (iVar6 >> 6) * -0x40) * 0x10000) >> 0x10) * sVar1;
+    iVar6 = (int)sVar3;
+    if (iVar6 < 0) {
+      iVar6 = iVar6 + 0xff;
+    }
+    param_2[1] = sVar3 + (short)((uint)iVar6 >> 8) * -0x100;
+    param_2[2] = local_28 * sVar1;
+    param_2[3] = local_26;
+    local_30 = (short)tp;
+    param_2[4] = local_30;
+    uVar4 = GetTPage(tp,0,(int)sVar2,(int)sVar3);
+    param_2[5] = uVar4;
+    param_2[8] = local_20;
+    param_2[9] = local_1e;
+    param_2[6] = local_1c;
+    param_2[7] = local_1a;
+    param_2 = param_2 + 10;
+  }
+  DrawSync(0);
+  if ((tp & 8) != 0) {
+    local_10.x = local_20;
+    local_10.y = local_1e;
+    local_10.w = local_1c;
+    local_10.h = local_1a;
+    LoadImage(&local_10,local_18);
+    DrawSync(0);
+  }
+  return param_2;
+}
+
