@@ -9,7 +9,7 @@ from PyQt6.QtGui import QFont
 class HexEditor(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Hex Editor - OTCB Tools")
+        self.setWindowTitle("Hex Editor")
         self.resize(1300, 750)
         self.current_file = None
         self.original_data = None

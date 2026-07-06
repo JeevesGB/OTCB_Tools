@@ -17,7 +17,7 @@ from hex_editor import HexEditor   # ← New import
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("OTCB File Scanner & Hex Viewer")
+        self.setWindowTitle("File Scanner & Hex Viewer")
         self.resize(1600, 900)
 
         self.current_root = None
