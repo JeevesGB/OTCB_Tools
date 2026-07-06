@@ -1,26 +1,30 @@
 import os
 
-parent_folder = r"E:\6 GAMES\1. Playstation 1\Option.Tuning.Car.Battle.2.JAP.PS1-ZTM\Extracted"
-
+parent_folder = r"REPLACE\WITH\PATH"
 script_dir = os.path.dirname(os.path.abspath(__file__))
-output_file = os.path.join(script_dir, "folder_file_list.txt")
+output_file = os.path.join(script_dir, "OTCBSPECR.txt")
 
 with open(output_file, "w", encoding="utf-8") as f:
-    
-    for folder_name in sorted(os.listdir(parent_folder)):
-        folder_path = os.path.join(parent_folder, folder_name)
-        
-        if os.path.isdir(folder_path):
-            f.write(f"{folder_name}\n")
-            
-            files = sorted(os.listdir(folder_path))
-            
-            for file in files:
-                file_path = os.path.join(folder_path, file)
-                
-                if os.path.isfile(file_path):
-                    f.write(f"    {file}\n")
-            
-            f.write("\n") 
+
+    for root, dirs, files in os.walk(parent_folder):
+        dirs.sort()
+        files.sort()
+
+        # Skip writing a line for the parent folder itself
+        if root == parent_folder:
+            depth = 0
+        else:
+            rel_path = os.path.relpath(root, parent_folder)
+            depth = rel_path.count(os.sep) + 1
+            indent = "    " * (depth - 1)
+            folder_name = os.path.basename(root)
+            f.write(f"{indent}{folder_name}\n")
+
+        file_indent = "    " * depth
+        for file in files:
+            f.write(f"{file_indent}{file}\n")
+
+        if files or dirs:
+            f.write("\n")
 
 print(f"File list saved to: {output_file}")
