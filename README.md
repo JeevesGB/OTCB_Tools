@@ -27,6 +27,7 @@ _Webpage - https://jeevesgb.github.io/pages/option/option.html_
 
 #   OTCB 1 Demo Info    ```SLPM_802.03```
 
+[OTCB Demo Info](docs/otcbdmo.md)
 ---
 
 #   OTCB 1 Info         ```SLPS_012.07```
