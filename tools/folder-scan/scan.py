@@ -1,8 +1,8 @@
 import os
 
-parent_folder = r"REPLACE\WITH\PATH"
+parent_folder = r"REPLACE\WITH\PATH"    # FOLDER PATH
 script_dir = os.path.dirname(os.path.abspath(__file__))
-output_file = os.path.join(script_dir, "OTCBSPECR.txt")
+output_file = os.path.join(script_dir, "OUTPUT.txt")    # OUTPUT FILE NAME
 
 with open(output_file, "w", encoding="utf-8") as f:
 
@@ -10,7 +10,6 @@ with open(output_file, "w", encoding="utf-8") as f:
         dirs.sort()
         files.sort()
 
-        # Skip writing a line for the parent folder itself
         if root == parent_folder:
             depth = 0
         else:
