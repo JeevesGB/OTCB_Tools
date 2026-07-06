@@ -2,6 +2,21 @@
 
 [Go Back](/README.md)
 
+####    Duckstation Cheats
+
+|       Cheat           |       Code        |
+|-----------------------|-------------------|
+|   Infinite Coupons    |   800BA764 03E7   |
+|   Unlock All Arcade Cars/Tracks    |   50001C02 0000 800BA77E FFFF   |
+
+**WARNING THE FOLLOWING CHEATS MAY CRASH THE GAME!**
+
+|       Cheat           |       Code        |
+|-----------------------|-------------------|
+|   some kind of speed control    |   901FF070 00000000   |
+|   glitch tf out    |   901FF090 0001D4E9   |
+|   locks steering    |   901FF1B0 00000001   |
+
 ####    Filetypes
 
 | Extension | Found In | Likely Purpose |

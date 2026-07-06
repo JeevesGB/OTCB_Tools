@@ -2,6 +2,15 @@
 
 [Go Back](/README.md)
 
+####    Duckstation Cheats
+
+|       Cheat           |       Code        |
+|-----------------------|-------------------|
+|   Infinite Tuning Money Coupon    |   800A62B0 5FFF   |
+|   No Gear Boost Mode    |   50000702 0000 801FF07E 01B6   |
+|   Lap Timer = 0    |   8017E48C 0000   |
+|   Total Timer = 0    |   8017E490 0000   |
+
 ####    Filetypes
 
 | Extension | Found In | Likely Purpose |

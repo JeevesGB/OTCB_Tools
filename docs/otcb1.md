@@ -2,6 +2,12 @@
 
 [Go Back](/README.md)
 
+####    Duckstation Cheats
+
+|       Cheat           |       Code        |
+|-----------------------|-------------------|
+|   Infinite Money    |   900A5318 3B9AC0FF   |
+
 ####    Filetypes
 
 | Extension     | Found In                  | Likely Purpose |
