@@ -1,6 +1,18 @@
 <img src="img/otcbsr/logo.png" width=300>
 
+####    Filetypes
 
+| Extension | Found In | Likely Purpose |
+|-----------|----------|-----------------|
+| `.CAR` | C0–C5 | Car data files (each car has a `_D` and `_N` variant) |
+| `.BIN` | CS, OTHER, RACE, SUB0–SUB3 | Generic binary data (models, menus, backgrounds, race logic, etc.) |
+| `.TIX` | CS | Texture files paired with `.BIN` circuit files |
+| `.VOI` | EV1–EV3 | Voice/audio clips (driver dialogue, per car) |
+| `.VHB` | SE | Sound/voice header bank |
+| `.SHB` | SE | Sound header bank (sequence files) |
+| `.TIM` | WHEEL1–WHEEL3 | PlayStation TIM image files (wheel/tire textures) |
+| `.STR` | X_STR | Streamed video/FMV files (opening, ending, movie) |
+| `.DA` | Z_DA | Data archive files |
 
 ####    Game File Structure
 
