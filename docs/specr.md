@@ -1,5 +1,7 @@
 <img src="img/otcbsr/logo.png" width=300>
 
+[Go Back](/README.md)
+
 ####    Filetypes
 
 | Extension | Found In | Likely Purpose |
