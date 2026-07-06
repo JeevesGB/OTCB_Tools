@@ -4,6 +4,8 @@
 
 Project to potentially create tools for extracting/modifying files in Option Tuning Car Battle Spec R 
 
+Below you will find each game listed with a document detailing each games file structure.
+
 Contributors welcome!
 
 _Discord - https://discord.gg/udzejAFTFb_
