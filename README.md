@@ -31,6 +31,8 @@ _Webpage - https://jeevesgb.github.io/pages/option/option.html_
 
 #   OTCB 1 Info         ```SLPS_012.07```
 
+[OTCB 1 Info](docs/otcb1.md)
+
 ####    Box Art
 
 <img src="docs/img/otcb1/box1.jpg" width="600">
@@ -42,6 +44,8 @@ _Webpage - https://jeevesgb.github.io/pages/option/option.html_
 
 #   OTCB 2 Info         ```SLPS_018.57```
 
+[OTCB 2 Info](docs/otcb2.md)
+
 ####    Box Art
 
 <img src="docs/img/otcb2/box1.jpg" width="600">
@@ -50,7 +54,9 @@ _Webpage - https://jeevesgb.github.io/pages/option/option.html_
 ---
 
 #   OTCB Spec R Info    ```SLPS-025.87```
+
 [Spec R Info](docs/specr.md)
+
 ####    Box Art
 
 <img src="docs/img/otcbsr/box1.jpg" width="600">

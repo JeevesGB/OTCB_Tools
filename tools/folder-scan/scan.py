@@ -1,6 +1,6 @@
 import os
 
-parent_folder = r"C:\Users\there\Desktop\OTCB_Modding\Exported"
+parent_folder = r"E:\6 GAMES\1. Playstation 1\Option.Tuning.Car.Battle.2.JAP.PS1-ZTM\Extracted"
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 output_file = os.path.join(script_dir, "folder_file_list.txt")
