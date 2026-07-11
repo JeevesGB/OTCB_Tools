@@ -1,0 +1,73 @@
+/* styles.qss */
+QMainWindow {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+QTableView {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    gridline-color: #444444;
+    selection-background-color: #0d7cff;
+    selection-color: white;
+    border: 1px solid #444444;
+    font-size: 9.5pt;
+}
+
+QTableView::item {
+    padding: 5px;
+}
+
+QHeaderView::section {
+    background-color: #383838;
+    color: #e0e0e0;
+    padding: 6px;
+    border: none;
+    border-right: 1px solid #444444;
+    border-bottom: 1px solid #444444;
+}
+
+/* Improved for Hex Viewer */
+QPlainTextEdit {
+    background-color: #1a1a1a;
+    font-family: "Courier New", monospace;
+    font-size: 10pt;
+    border: 1px solid #444444;
+    padding: 4px;
+}
+
+/* Allow character formatting to work */
+QPlainTextEdit[highlight="true"] {
+    color: #00ff9d;
+}
+
+QPushButton {
+    background-color: #0d7cff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: #3b9eff;
+}
+
+QProgressBar {
+    border: 1px solid #444444;
+    text-align: center;
+    background-color: #2d2d2d;
+    height: 18px;
+}
+
+QProgressBar::chunk {
+    background-color: #0d7cff;
+}
+
+QLabel {
+    color: #e0e0e0;
+}
+
+QSplitter::handle {
+    background-color: #444444;
+}

@@ -3,40 +3,15 @@ from datetime import datetime
 from PyQt6.QtWidgets import (
     QMainWindow, QSplitter, QTableView, QTreeView, QLabel, QVBoxLayout, QWidget,
     QHBoxLayout, QPushButton, QFileDialog, QMessageBox, QProgressBar,
-    QHeaderView, QLineEdit
+    QHeaderView
 )
-from PyQt6.QtCore import Qt, QDir, QSortFilterProxyModel
+from PyQt6.QtCore import Qt, QDir
 from PyQt6.QtGui import QFont, QFileSystemModel
 
-from file_model import FileTableModel
-from scan_thread import ScanThread
-from hex_viewer import HexViewer
-from hex_editor import HexEditor
-
-
-class FileFilterProxyModel(QSortFilterProxyModel):
-    """
-    Filters rows by matching the search text against name, type, OR full
-    path (case-insensitive substring), rather than QSortFilterProxyModel's
-    default of matching only one fixed column. Sorting is left to the base
-    class, which delegates to FileTableModel.sort().
-    """
-
-    def filterAcceptsRow(self, source_row, source_parent):
-        text = self.filterRegularExpression().pattern().lower()
-        if not text:
-            return True
-
-        model = self.sourceModel()
-        info = model.get_file_info(source_row)
-        if info is None:
-            return False
-
-        return (
-            text in info['name'].lower()
-            or text in info['type'].lower()
-            or text in info['path'].lower()
-        )
+from tools.fileview.archive.src.file_model import FileTableModel
+from tools.fileview.archive.src.scan_thread import ScanThread
+from tools.fileview.archive.src.hex_viewer import HexViewer
+from tools.fileview.archive.src.hex_editor import HexEditor
 
 
 class MainWindow(QMainWindow):
@@ -48,9 +23,6 @@ class MainWindow(QMainWindow):
         self.current_root = None
         self.files_data = []
         self.current_model = None
-        self.proxy_model = None
-        self.scan_thread = None
-        self.hex_editor = None  # reused across calls instead of piling up windows
 
         self._setup_ui()
         self._load_styles()
@@ -66,22 +38,10 @@ class MainWindow(QMainWindow):
         self.btn_select_root.clicked.connect(self.select_root_folder)
         self.btn_full_scan = QPushButton("🔍 Full Recursive Scan")
         self.btn_full_scan.clicked.connect(self.start_full_scan)
-        self.btn_cancel_scan = QPushButton("✖ Cancel Scan")
-        self.btn_cancel_scan.clicked.connect(self.cancel_full_scan)
-        self.btn_cancel_scan.setVisible(False)
 
         toolbar.addWidget(self.btn_select_root)
         toolbar.addWidget(self.btn_full_scan)
-        toolbar.addWidget(self.btn_cancel_scan)
         toolbar.addStretch()
-
-        self.filter_edit = QLineEdit()
-        self.filter_edit.setPlaceholderText("Filter by name, extension, or path...")
-        self.filter_edit.setClearButtonEnabled(True)
-        self.filter_edit.setMaximumWidth(320)
-        self.filter_edit.textChanged.connect(self.on_filter_changed)
-        toolbar.addWidget(self.filter_edit)
-
         main_layout.addLayout(toolbar)
 
         self.progress = QProgressBar()
@@ -102,7 +62,6 @@ class MainWindow(QMainWindow):
         self.table = QTableView()
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.setSortingEnabled(True)
         self.table.clicked.connect(self.on_file_selected)
         splitter.addWidget(self.table)
 
@@ -141,21 +100,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"Stylesheet error: {e}")
 
-    def _set_table_data(self, results: list):
-        """Wrap results in the table model + filter/sort proxy and attach to the view."""
-        self.files_data = results
-        self.current_model = FileTableModel(results)
-
-        self.proxy_model = FileFilterProxyModel()
-        self.proxy_model.setSourceModel(self.current_model)
-        self.proxy_model.setFilterRegularExpression(self.filter_edit.text())
-
-        self.table.setModel(self.proxy_model)
-
-    def on_filter_changed(self, text: str):
-        if self.proxy_model is not None:
-            self.proxy_model.setFilterRegularExpression(text)
-
     def select_root_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Root Folder")
         if folder:
@@ -190,20 +134,19 @@ class MainWindow(QMainWindow):
                             'modified': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
                             'modified_ts': stat.st_mtime
                         })
-                    except Exception:
+                    except:
                         continue
             results.sort(key=lambda x: x['modified_ts'], reverse=True)
         except Exception as e:
             print(f"Error reading folder: {e}")
 
-        self._set_table_data(results)
+        self.files_data = results
+        self.current_model = FileTableModel(results)
+        self.table.setModel(self.current_model)
 
-    def on_file_selected(self, proxy_index):
-        if self.proxy_model is None:
-            return
-        source_index = self.proxy_model.mapToSource(proxy_index)
-        row = source_index.row()
-        if row < 0 or row >= len(self.files_data):
+    def on_file_selected(self, index):
+        row = index.row()
+        if row >= len(self.files_data):
             return
         file_info = self.files_data[row]
 
@@ -217,40 +160,36 @@ class MainWindow(QMainWindow):
         self.info_label.setText(info)
         self.hex_viewer.show_hex(file_info['path'])
 
-    def _current_selected_file_info(self):
-        """Resolve the selected table row (through the proxy model) to a file_info dict, or None."""
-        if self.current_model is None or self.proxy_model is None or len(self.files_data) == 0:
-            return None
+    def open_in_hex_editor(self):
+        """Open currently selected file in Hex Editor"""
+        if self.current_model is None or len(self.files_data) == 0:
+            QMessageBox.warning(self, "No Data", "Please load a folder first.")
+            return
 
+        # Get selected row
         selection_model = self.table.selectionModel()
         if not selection_model:
-            return None
-
-        selected = selection_model.selectedRows()
-        if selected:
-            proxy_index = selected[0]
-        else:
-            proxy_index = self.table.currentIndex()
-            if not proxy_index.isValid():
-                return None
-
-        source_index = self.proxy_model.mapToSource(proxy_index)
-        row = source_index.row()
-        if row < 0 or row >= len(self.files_data):
-            return None
-
-        return self.files_data[row]
-
-    def open_in_hex_editor(self):
-        """Open currently selected file in the Hex Editor, reusing one window instead of stacking new ones."""
-        file_info = self._current_selected_file_info()
-        if file_info is None:
             QMessageBox.warning(self, "No Selection", "Please select a file in the table first.")
             return
 
-        if self.hex_editor is None:
-            self.hex_editor = HexEditor()
+        selected = selection_model.selectedRows()
+        if not selected:
+            # Fallback: use current index
+            current = self.table.currentIndex()
+            if current.isValid():
+                row = current.row()
+            else:
+                QMessageBox.warning(self, "No Selection", "Please select a file in the table first.")
+                return
+        else:
+            row = selected[0].row()
 
+        if row >= len(self.files_data):
+            QMessageBox.warning(self, "No Selection", "Please select a file in the table first.")
+            return
+
+        file_info = self.files_data[row]
+        self.hex_editor = HexEditor()
         self.hex_editor.load_file(file_info['path'])
 
     def start_full_scan(self):
@@ -258,39 +197,24 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "No Root", "Please select a root folder first.")
             return
         self.btn_full_scan.setEnabled(False)
-        self.btn_cancel_scan.setVisible(True)
         self.progress.setVisible(True)
         self.progress.setRange(0, 0)
 
         self.scan_thread = ScanThread(self.current_root)
         self.scan_thread.progress.connect(self.update_progress)
         self.scan_thread.finished.connect(self.full_scan_finished)
-        self.scan_thread.cancelled.connect(self.full_scan_cancelled)
         self.scan_thread.start()
-
-    def cancel_full_scan(self):
-        if self.scan_thread is not None and self.scan_thread.isRunning():
-            self.scan_thread.requestInterruption()
-            self.btn_cancel_scan.setEnabled(False)
-            self.progress.setFormat("Cancelling...")
 
     def update_progress(self, count: int, message: str):
         self.progress.setFormat(f"{message} ({count:,})")
 
-    def _reset_scan_ui(self):
+    def full_scan_finished(self, results: list):
+        self.files_data = results
+        self.current_model = FileTableModel(results)
+        self.table.setModel(self.current_model)
+
         self.progress.setVisible(False)
         self.btn_full_scan.setEnabled(True)
-        self.btn_cancel_scan.setVisible(False)
-        self.btn_cancel_scan.setEnabled(True)
 
-    def full_scan_finished(self, results: list):
-        self._set_table_data(results)
-        self._reset_scan_ui()
-        QMessageBox.information(self, "Full Scan Complete",
+        QMessageBox.information(self, "Full Scan Complete", 
                               f"Found {len(results):,} files recursively in:\n{self.current_root}")
-
-    def full_scan_cancelled(self, results: list):
-        self._set_table_data(results)
-        self._reset_scan_ui()
-        QMessageBox.information(self, "Scan Cancelled",
-                              f"Scan stopped early. {len(results):,} files found before cancelling.")

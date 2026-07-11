@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "otcb-fileview"
+version = "0.2.0"
+description = "File Scanner & Hex Viewer - PyQt6 desktop tool for browsing, scanning, and inspecting files"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "JejCo" }]
+dependencies = [
+    "PyQt6>=6.6",
+]
+
+[project.scripts]
+otcb-fileview = "main:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+py-modules = [
+    "main",
+    "main_window",
+    "file_model",
+    "scan_thread",
+    "hex_viewer",
+    "hex_editor",
+    "hex_utils",
+]

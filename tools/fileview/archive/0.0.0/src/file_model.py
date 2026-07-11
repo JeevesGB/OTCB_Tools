@@ -31,24 +31,3 @@ class FileTableModel(QAbstractTableModel):
 
     def get_file_info(self, row: int):
         return self.files[row] if 0 <= row < len(self.files) else None
-
-    # Sort keys for each column. Size and Modified sort on their raw
-    # numeric values (not the formatted strings), so "2 KB" correctly
-    # sorts before "1 MB" and dates sort chronologically rather than
-    # alphabetically.
-    _SORT_KEYS = {
-        0: lambda row: row['name'].lower(),
-        1: lambda row: row['type'].lower(),
-        2: lambda row: row['size'],
-        3: lambda row: row['modified_ts'],
-        4: lambda row: row['path'].lower(),
-    }
-
-    def sort(self, column: int, order=Qt.SortOrder.AscendingOrder):
-        """Enables clicking column headers to sort (QTableView.setSortingEnabled)."""
-        key_func = self._SORT_KEYS.get(column)
-        if key_func is None:
-            return
-        self.layoutAboutToBeChanged.emit()
-        self.files.sort(key=key_func, reverse=(order == Qt.SortOrder.DescendingOrder))
-        self.layoutChanged.emit()

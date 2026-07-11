@@ -7,7 +7,6 @@ from PyQt6.QtCore import QThread, pyqtSignal
 class ScanThread(QThread):
     progress = pyqtSignal(int, str)
     finished = pyqtSignal(list)
-    cancelled = pyqtSignal(list)  # partial results gathered before cancellation
 
     def __init__(self, root_path: str):
         super().__init__()
@@ -16,18 +15,9 @@ class ScanThread(QThread):
     def run(self):
         results = []
         count = 0
-        was_cancelled = False
 
         for root, _, files in os.walk(self.root_path):
-            if self.isInterruptionRequested():
-                was_cancelled = True
-                break
-
             for filename in files:
-                if count % 50 == 0 and self.isInterruptionRequested():
-                    was_cancelled = True
-                    break
-
                 full_path = os.path.join(root, filename)
                 try:
                     stat = os.stat(full_path)
@@ -50,15 +40,8 @@ class ScanThread(QThread):
                 except Exception:
                     continue
 
-            if was_cancelled:
-                break
-
         results.sort(key=lambda x: x['modified_ts'], reverse=True)
-
-        if was_cancelled:
-            self.cancelled.emit(results)
-        else:
-            self.finished.emit(results)
+        self.finished.emit(results)
 
     @staticmethod
     def _format_size(size: int) -> str:

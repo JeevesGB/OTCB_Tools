@@ -1,11 +1,47 @@
 import os
-import re
 from PyQt6.QtWidgets import (
-    QPlainTextEdit, QListWidget, QTabWidget, QWidget, 
-    QVBoxLayout, QListWidgetItem, QPushButton, QTextEdit
+    QPlainTextEdit, QListWidget, QTabWidget, QWidget,
+    QVBoxLayout, QListWidgetItem, QPushButton, QTextEdit, QLabel
 )
 from PyQt6.QtGui import QFont, QTextCursor, QTextCharFormat, QColor
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+
+from hex_utils import build_hex_lines, extract_strings
+
+
+class HexLoadThread(QThread):
+    """
+    Reads the file and builds the hex dump + extracted strings off the GUI
+    thread. Without this, show_hex() used to read up to 100MB and run two
+    regex passes directly inside the button-click handler, which visibly
+    froze the UI on large files.
+    """
+    finished = pyqtSignal(str, list, int, bool)  # hex_text, strings, file_size, truncated
+    error = pyqtSignal(str)
+
+    def __init__(self, filepath: str, max_bytes: int):
+        super().__init__()
+        self.filepath = filepath
+        self.max_bytes = max_bytes
+
+    def run(self):
+        try:
+            file_size = os.path.getsize(self.filepath)
+            with open(self.filepath, 'rb') as f:
+                data = f.read(self.max_bytes)
+
+            truncated = file_size > self.max_bytes
+
+            lines = build_hex_lines(data)
+            if truncated:
+                lines.append(f"\n... TRUNCATED: First {self.max_bytes:,} bytes of {file_size:,} bytes total")
+            else:
+                lines.append(f"\n[End of file - {file_size:,} bytes]")
+
+            strings = extract_strings(data)
+            self.finished.emit('\n'.join(lines), strings, file_size, truncated)
+        except Exception as e:
+            self.error.emit(str(e))
 
 
 class HexViewer(QWidget):
@@ -13,9 +49,13 @@ class HexViewer(QWidget):
         super().__init__()
         self.current_filepath = None
         self.current_extra_selections = []
+        self.load_thread = None
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+
+        self.status_label = QLabel("")
+        layout.addWidget(self.status_label)
 
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)
@@ -24,7 +64,7 @@ class HexViewer(QWidget):
         self.hex_text = QPlainTextEdit()
         self.hex_text.setReadOnly(True)
         self.hex_text.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
-        
+
         font = QFont("Courier New", 10)
         font.setStyleHint(QFont.StyleHint.Monospace)
         self.hex_text.setFont(font)
@@ -33,7 +73,7 @@ class HexViewer(QWidget):
         # Strings Tab
         strings_panel = QWidget()
         strings_layout = QVBoxLayout(strings_panel)
-        
+
         self.strings_list = QListWidget()
         self.strings_list.itemClicked.connect(self.highlight_string)
         strings_layout.addWidget(self.strings_list)
@@ -48,58 +88,35 @@ class HexViewer(QWidget):
         self.current_filepath = filepath
         self.strings_list.clear()
         self.clear_highlight()
+        self.hex_text.setPlainText("Loading...")
+        self.status_label.setText(f"Loading {os.path.basename(filepath)}...")
 
-        try:
-            file_size = os.path.getsize(filepath)
-            
-            if file_size > max_bytes:
-                print(f"Note: File is {file_size/1024/1024:.1f} MB. Showing first 100MB.")
-
-            read_limit = max_bytes
-            with open(filepath, 'rb') as f:
-                data = f.read(read_limit)
-
-            self._build_hex_view(data, file_size)
-            self._extract_strings(data)
-
-        except Exception as e:
-            self.hex_text.setPlainText(f"Error reading file:\n{str(e)}")
-
-    def _build_hex_view(self, data: bytes, file_size: int):
-        lines = []
-        for i in range(0, len(data), 16):
-            chunk = data[i:i+16]
-            hex_part = ' '.join(f'{b:02X}' for b in chunk)
-            ascii_part = ''.join(chr(b) if 32 <= b <= 126 else '.' for b in chunk)
-            lines.append(f"{i:08X}  {hex_part:<47}  {ascii_part}")
-
-        if len(data) < file_size:
-            lines.append(f"\n... TRUNCATED: First 100MB of {file_size:,} bytes total")
-        else:
-            lines.append(f"\n[End of file - {file_size:,} bytes]")
-
-        self.hex_text.setPlainText('\n'.join(lines))
-
-    def _extract_strings(self, data: bytes):
-        seen = set()
-        # ASCII
-        for match in re.finditer(b'[ -~]{4,}', data):
-            offset = match.start()
-            s = match.group().decode('ascii', errors='replace').strip()
-            if len(s) >= 4 and s not in seen:
-                seen.add(s)
-                self.strings_list.addItem(f"ASCII  {offset:08X}  |  {s}")
-
-        # UTF-16LE
-        for match in re.finditer(b'(?:[\x20-\x7E]\x00){4,}', data):
-            offset = match.start()
+        # If a previous load is still running, disconnect its signals so
+        # its result is ignored - starting a second QThread on the same
+        # object before the first finishes would be unsafe otherwise.
+        if self.load_thread is not None and self.load_thread.isRunning():
             try:
-                s = match.group().decode('utf-16le', errors='replace').strip()
-                if len(s) >= 4 and s not in seen:
-                    seen.add(s)
-                    self.strings_list.addItem(f"UTF-16 {offset:08X}  |  {s}")
-            except:
-                continue
+                self.load_thread.finished.disconnect()
+                self.load_thread.error.disconnect()
+            except TypeError:
+                pass
+
+        self.load_thread = HexLoadThread(filepath, max_bytes)
+        self.load_thread.finished.connect(self._on_load_finished)
+        self.load_thread.error.connect(self._on_load_error)
+        self.load_thread.start()
+
+    def _on_load_finished(self, hex_text: str, strings: list, file_size: int, truncated: bool):
+        self.hex_text.setPlainText(hex_text)
+        for kind, offset, s in strings:
+            self.strings_list.addItem(f"{kind:<6} {offset:08X}  |  {s}")
+
+        note = " (truncated to first 100MB)" if truncated else ""
+        self.status_label.setText(f"{os.path.basename(self.current_filepath)} - {file_size:,} bytes{note}")
+
+    def _on_load_error(self, message: str):
+        self.hex_text.setPlainText(f"Error reading file:\n{message}")
+        self.status_label.setText("")
 
     def highlight_string(self, item: QListWidgetItem):
         self.clear_highlight()
