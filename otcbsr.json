@@ -1,0 +1,18 @@
+{
+  "game": { "id": "SLPS_025.87", "name": "Option.Tuning.Car.Battle.Spec.R.JAP.PS1-ZTM", "output": "./Recompiled" },
+  "cue": "Option.Tuning.Car.Battle.Spec.R.JAP.PS1-ZTM.cue",
+  "linearSweep": true,
+  "functions": [
+    { "address": "0x80010000", "name": "example_known_func" }
+  ],
+  "overlays": [
+    {
+      "name": "ovl5",
+      "file": "SYSTEM.CNF",
+      "base": "0x80080000",
+      "linearSweep": true
+    }
+  ],
+  "stubs": [],
+  "ignored": []
+}
